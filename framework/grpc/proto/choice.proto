@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./choice";
+
+package choice;
+
+message Choice {
+    string id = 1;
+    string value = 2;
+    int32 weight = 3;
+    string color = 4;
+    google.protobuf.Timestamp updatedDateTime = 5;
+}
+
+message ChoiceList {
+    string id = 1;
+    repeated Choice choices = 2;
+    google.protobuf.Timestamp updatedDateTime = 3;
+}
+
+message GetByIdRequest {
+    string id = 1;
+}
+
+message UpsertResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+service ChoiceService {
+    rpc GetChoiceListById (GetByIdRequest) returns (ChoiceList) {}
+    rpc UpsertChoiceList (ChoiceList) returns (UpsertResponse) {}
+}
