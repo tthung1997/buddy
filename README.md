@@ -17,12 +17,12 @@ The project is structured into several packages:
 To run the backend service, navigate to the `backend` directory and run:
 
 ```sh
-go run main.go
+go run choice.go
 ```
 
 To run the frontend service, navigate to the `frontend` directory and run:
 ```sh
-go run main.go
+go run choice.go
 ```
 
 ## Dependencies

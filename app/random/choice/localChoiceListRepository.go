@@ -3,8 +3,8 @@ package choice
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/tthung1997/buddy/core/random"
 )
@@ -13,14 +13,32 @@ type LocalChoiceListRepository struct {
 	filePath string
 }
 
-func NewLocalChoiceListRepository(filePath string) *LocalChoiceListRepository {
+func NewLocalChoiceListRepository(filePath string) (*LocalChoiceListRepository, error) {
+	err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm)
+	if err != nil {
+		return nil, err
+	}
+
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		_, err := os.Create(filePath)
+		file, err := os.Create(filePath)
 		if err != nil {
-			log.Fatalf("Error creating file %s: %s", filePath, err)
+			return nil, err
+		}
+		defer file.Close()
+
+		choiceLists := make(map[string]random.ChoiceList)
+		data, err := json.MarshalIndent(choiceLists, "", " ")
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = file.Write(data)
+		if err != nil {
+			return nil, err
 		}
 	}
-	return &LocalChoiceListRepository{filePath: filePath}
+
+	return &LocalChoiceListRepository{filePath: filePath}, nil
 }
 
 func (r *LocalChoiceListRepository) GetChoiceList(id string) (random.ChoiceList, error) {
