@@ -1,4 +1,5 @@
 # Buddy
+[![Go](https://github.com/tthung1997/buddy/actions/workflows/go.yml/badge.svg)](https://github.com/tthung1997/buddy/actions/workflows/go.yml)
 
 Buddy is a Go project that represents a friend who can help you with your day-to-day simple needs such as: 
 
