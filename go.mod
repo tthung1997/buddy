@@ -3,7 +3,6 @@ module github.com/tthung1997/buddy
 go 1.21.5
 
 require (
-	github.com/google/uuid v1.5.0
 	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.32.0
 )

@@ -13,13 +13,13 @@ func (r *SimpleRandomizer) GetChoice(choices []random.Choice) random.Choice {
 	// return a random choice from the list of choices taking weight into account
 	totalWeight := 0
 	for _, choice := range choices {
-		totalWeight += choice.Weight
+		totalWeight += int(choice.Weight)
 	}
 
 	randomNumber := rand.Intn(totalWeight)
 
 	for _, choice := range choices {
-		randomNumber -= choice.Weight
+		randomNumber -= int(choice.Weight)
 		if randomNumber < 0 {
 			return choice
 		}
