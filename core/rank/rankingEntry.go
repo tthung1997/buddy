@@ -3,8 +3,9 @@ package rank
 import "time"
 
 type RankingEntry struct {
-	Id              string
-	Rank            int32
+	Id              int
+	Rank            int
 	UpdatedDateTime time.Time
-	Description     string
+	Value           string
+	Additionals     string
 }

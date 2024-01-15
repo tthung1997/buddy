@@ -13,7 +13,7 @@ const (
 )
 
 type IPairwiseRankEngine interface {
-	GetNextPair() (RankingEntryPair, error)
-	SetResult(RankingEntryPair, PairwiseRankResult) error
-	GetRanking() ([]RankingEntry, error)
+	Initialize([]string) ([]RankingEntry, error)
+	GetNextPair([]RankingEntry) (RankingEntryPair, error)
+	UpdateRankings([]RankingEntry, RankingEntryPair, PairwiseRankResult) ([]RankingEntry, error)
 }
