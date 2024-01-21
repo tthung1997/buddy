@@ -25,10 +25,10 @@ To run the backend service, navigate to the `backend` directory and run `go run`
 go run choice.go
 ```
 
-To run the frontend service, navigate to the `frontend` directory and run `go run` for the microservice that you need:
+To run the frontend service:
 
 ```sh
-go run choice.go
+go run frontend/main.go
 ```
 
 ## Dependencies
