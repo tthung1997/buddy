@@ -1,6 +1,7 @@
 # Buddy
 [![Go](https://github.com/tthung1997/buddy/actions/workflows/go.yml/badge.svg)](https://github.com/tthung1997/buddy/actions/workflows/go.yml)
 [![CodeQL](https://github.com/tthung1997/buddy/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/tthung1997/buddy/actions/workflows/github-code-scanning/codeql)
+[![pages-build-deployment](https://github.com/tthung1997/buddy/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/tthung1997/buddy/actions/workflows/pages/pages-build-deployment)
 
 Buddy is a Go project that represents a friend who can help you with your day-to-day simple needs such as: 
 
