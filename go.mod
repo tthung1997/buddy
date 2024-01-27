@@ -1,8 +1,9 @@
 module github.com/tthung1997/buddy
 
-go 1.21.5
+go 1.21.6
 
 require (
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.32.0
 )

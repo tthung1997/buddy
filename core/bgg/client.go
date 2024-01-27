@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -89,8 +90,8 @@ func (c *Client) GetCollection(filter CollectionFilter) (*Collection, error) {
 		url += "&excludesubtype=" + filter.ExcludeSubtype
 	}
 
-	if filter.Own {
-		url += "&own=1"
+	if filter.Own != "" {
+		url += "&own=" + filter.Own
 	}
 
 	if filter.Rated {
@@ -122,11 +123,15 @@ func (c *Client) GetCollection(filter CollectionFilter) (*Collection, error) {
 	}
 
 	for i := 0; i < c.Config.MaxRetries; i++ {
+		log.Printf("[Outgoing] GET %v", url)
+
 		resp, err := http.Get(url)
 		if err != nil {
 			return nil, err
 		}
 		defer resp.Body.Close()
+
+		log.Printf("[Outgoing] Status code: %v", resp.StatusCode)
 
 		if resp.StatusCode == http.StatusAccepted {
 			time.Sleep(time.Duration(c.Config.RetryDelayInSeconds) * time.Second)

@@ -4,7 +4,7 @@ type CollectionFilter struct {
 	Username       string
 	Subtype        string
 	ExcludeSubtype string
-	Own            bool
+	Own            string
 	Rated          bool
 	Played         bool
 	Trade          bool
@@ -19,19 +19,19 @@ type CollectionItem struct {
 	Subtype       string `xml:"subtype,attr"`
 	CollectionId  string `xml:"collid,attr"`
 	Name          string `xml:"name"`
-	YearPublished string `xml:"yearpublished"`
+	YearPublished int    `xml:"yearpublished"`
 	Image         string `xml:"image"`
 	Thumbnail     string `xml:"thumbnail"`
-	NumPlays      string `xml:"numplays"`
+	NumPlays      int    `xml:"numplays"`
 	Status        struct {
-		Own          string `xml:"own,attr"`
-		PrevOwned    string `xml:"prevowned,attr"`
-		ForTrade     string `xml:"fortrade,attr"`
-		Want         string `xml:"want,attr"`
-		WantToPlay   string `xml:"wanttoplay,attr"`
-		WantToBuy    string `xml:"wanttobuy,attr"`
-		Wishlist     string `xml:"wishlist,attr"`
-		Preordered   string `xml:"preordered,attr"`
+		Own          int    `xml:"own,attr"`
+		PrevOwned    int    `xml:"prevowned,attr"`
+		ForTrade     int    `xml:"fortrade,attr"`
+		Want         int    `xml:"want,attr"`
+		WantToPlay   int    `xml:"wanttoplay,attr"`
+		WantToBuy    int    `xml:"wanttobuy,attr"`
+		Wishlist     int    `xml:"wishlist,attr"`
+		Preordered   int    `xml:"preordered,attr"`
 		LastModified string `xml:"lastmodified,attr"`
 	} `xml:"status"`
 	Comments      string `xml:"comment"`
