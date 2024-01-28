@@ -12,6 +12,7 @@
   <h1>Board Games</h1>
 
   <a href="/">Home</a>
+  <a href="/boardgames/pick">Pick</a>
 
   <form action="/boardgames" method="GET">
     <label for="username">Filter by username:</label>
@@ -73,6 +74,11 @@
   {{end}}
 </body>
 <script>
+  // Unescape
+  function unescapeParentheses(str) {
+    return str.replace(/%28/g, "(").replace(/%29/g, ")");
+  }
+
   // Sort
   let sortOrders = { name: true, numPlays: true };
 

@@ -7,3 +7,8 @@ type IndexPageData struct {
 	Filter     bgg.CollectionFilter
 	Collection bgg.Collection
 }
+
+type PickPageData struct {
+	Error error
+	Items []bgg.CollectionItem
+}
