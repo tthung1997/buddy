@@ -5,7 +5,7 @@ go 1.21.6
 require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	google.golang.org/grpc v1.62.1
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
