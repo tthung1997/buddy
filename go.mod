@@ -1,6 +1,7 @@
 module github.com/tthung1997/buddy
 
-go 1.21.6
+go 1.22.7
+
 toolchain go1.22.9
 
 require (
