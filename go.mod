@@ -7,7 +7,7 @@ toolchain go1.22.9
 require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/protobuf v1.36.4
 )
 
 require (
