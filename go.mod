@@ -1,7 +1,8 @@
 module github.com/tthung1997/buddy
 
-go 1.22.7
-toolchain go1.23.7
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
