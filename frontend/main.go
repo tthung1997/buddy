@@ -30,10 +30,10 @@ func main() {
 
 	// home
 	http.HandleFunc("/", logging(home.Index))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))))
 
 	// board games
 	bgController := boardgames.NewBoardGamesController(bggClient, randomizer)
-	http.Handle("/boardgames/static/", http.StripPrefix("/boardgames/static/", http.FileServer(http.Dir("frontend/boardgames/static"))))
 	http.HandleFunc("/boardgames", logging(bgController.Index))
 	http.HandleFunc("/boardgames/pick", logging(bgController.Pick))
 

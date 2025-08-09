@@ -4,74 +4,79 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
-  <link rel="stylesheet" href="/boardgames/static/style.css">
+  <link rel="stylesheet" href="/static/style.css">
   <title>Board Games Pick</title>
 </head>
 
 <body>
-  <h1>Board Games Pick</h1>
+  <div class="container wide-container">
+    <h1>Board Games Pick</h1>
+    <a href="/" class="button-link">Home</a>
+    <a href="/boardgames" class="button-link">Board Games</a>
 
-  <a href="/">Home</a>
-  <a href="/boardgames">Board Games</a>
+    <form action="/boardgames/pick" method="GET">
+      <label for="username">Filter by username:</label>
+      <input type="text" id="username" name="username" placeholder="tthung1997">
+      <label for="count">Count:</label>
+      <input type="number" id="count" name="count" min="1" value="1">
+      <label for="prioritizeLessPlayed">
+        <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
+        Prioritize Less Played Games
+      </label>
+      <label for="excludeExpansion">
+        <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
+        Exclude Expansion
+      </label>
+      <label for="own">Own:</label>
+      <select id="own" name="own">
+        <option value="all">All</option>
+        <option value="yes" selected>Yes</option>
+        <option value="no">No</option>
+      </select>
+      <button type="submit">Submit</button>
+    </form>
 
-  <form action="/boardgames/pick" method="GET">
-    <label for="username">Filter by username:</label>
-    <input type="text" id="username" name="username" placeholder="tthung1997">
-    <label for="count">Count:</label>
-    <input type="number" id="count" name="count" min="1" value="1">
-    <label for="prioritizeLessPlayed">Prioritize Less Played Games:</label>
-    <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
-    <br/>
-    <label for="excludeExpansion">Exclude Expansion:</label>
-    <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
-    <label for="own">Own:</label>
-    <select id="own" name="own">
-      <option value="all">All</option>
-      <option value="yes" selected>Yes</option>
-      <option value="no">No</option>
-    </select>
-    <br/>
-    <button type="submit">Submit</button>
-  </form>
-
-  {{if .Error}}
-  <p><span class="error">Error: {{.Error}}</span></p>
-  {{else}}
-  <table id="collectionTable">
-    <thead>
-      <tr>
-        <th>Thumbnail</th>
-        <th>Name</th>
-        <th>#Plays</th>
-        <th>Own</th>
-        <th>PrevOwned</th>
-        <th>ForTrade</th>
-        <th>Want</th>
-        <th>WantToPlay</th>
-        <th>WantToBuy</th>
-        <th>Wishlist</th>
-        <th>Preordered</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .Items}}
-      <tr>
-        <td><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
-        <td>{{.Name}}</td>
-        <td style="text-align: center;">{{.NumPlays}}</td>
-        <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
-  {{end}}
+    {{if .Error}}
+    <p><span class="error">Error: {{.Error}}</span></p>
+    {{else}}
+    <div class="table-responsive">
+      <table id="collectionTable">
+        <thead>
+          <tr>
+            <th>Thumbnail</th>
+            <th>Name</th>
+            <th>#Plays</th>
+            <th>Own</th>
+            <th>PrevOwned</th>
+            <th>ForTrade</th>
+            <th>Want</th>
+            <th>WantToPlay</th>
+            <th>WantToBuy</th>
+            <th>Wishlist</th>
+            <th>Preordered</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Items}}
+          <tr>
+            <td><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
+            <td>{{.Name}}</td>
+            <td style="text-align: center;">{{.NumPlays}}</td>
+            <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+  </div>
 </body>
 
 <script>
