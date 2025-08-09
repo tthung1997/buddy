@@ -4,137 +4,137 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
-  <link rel="stylesheet" href="/boardgames/static/style.css">
+  <link rel="stylesheet" href="/static/style.css">
   <title>Board Games</title>
 </head>
 
 <body>
-  <h1>Board Games</h1>
+  <div class="container wide-container">
+    <h1>Board Games</h1>
+    <a href="/" class="button-link">Home</a>
+    <a href="/boardgames/pick" class="button-link">Pick</a>
+    <form action="/boardgames" method="GET">
+      <label for="username">Filter by username:</label>
+      <input type="text" id="username" name="username" placeholder="tthung1997">
+      <label for="excludeExpansion">Exclude Expansion:
+        <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
+      </label>
+      <button type="submit">Submit</button>
+    </form>
+    <label for="ownFilter">Own:</label>
+    <select id="ownFilter">
+      <option value="all">All</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <label for="prevOwnedFilter">PrevOwned:</label>
+    <select id="prevOwnedFilter">
+      <option value="all">All</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    {{if .Error}}
+    <p><span class="error">Error: {{.Error}}</span></p>
+    {{else}}
+    <div class="table-responsive">
+      <table id="collectionTable">
+        <thead>
+          <tr>
+            <th id="nameHeader">Name</th>
+            <th id="numPlaysHeader">#Plays</th>
+            <th>Own</th>
+            <th>PrevOwned</th>
+            <th>ForTrade</th>
+            <th>Want</th>
+            <th>WantToPlay</th>
+            <th>WantToBuy</th>
+            <th>Wishlist</th>
+            <th>Preordered</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Collection.Items}}
+          <tr>
+            <td>{{.Name}}</td>
+            <td style="text-align: center;">{{.NumPlays}}</td>
+            <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
+            <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+  </div>
+  <script>
+    // Unescape
+    function unescapeParentheses(str) {
+      return str.replace(/%28/g, "(").replace(/%29/g, ")");
+    }
 
-  <a href="/">Home</a>
-  <a href="/boardgames/pick">Pick</a>
+    // Sort
+    let sortOrders = { name: true, numPlays: true };
 
-  <form action="/boardgames" method="GET">
-    <label for="username">Filter by username:</label>
-    <input type="text" id="username" name="username" placeholder="tthung1997">
-    <label for="excludeExpansion">Exclude Expansion:</label>
-    <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
-    <button type="submit">Submit</button>
-  </form>
-
-  <label for="ownFilter">Own:</label>
-  <select id="ownFilter">
-    <option value="all">All</option>
-    <option value="yes">Yes</option>
-    <option value="no">No</option>
-  </select>
-  <label for="prevOwnedFilter">PrevOwned:</label>
-  <select id="prevOwnedFilter">
-    <option value="all">All</option>
-    <option value="yes">Yes</option>
-    <option value="no">No</option>
-  </select>
-
-  {{if .Error}}
-  <p><span class="error">Error: {{.Error}}</span></p>
-  {{else}}
-  <h2>{{.Filter.Username}}'s Collection</h2>
-  <table id="collectionTable">
-    <thead>
-      <tr>
-        <th id="nameHeader">Name</th>
-        <th id="numPlaysHeader">#Plays</th>
-        <th>Own</th>
-        <th>PrevOwned</th>
-        <th>ForTrade</th>
-        <th>Want</th>
-        <th>WantToPlay</th>
-        <th>WantToBuy</th>
-        <th>Wishlist</th>
-        <th>Preordered</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .Collection.Items}}
-      <tr>
-        <td>{{.Name}}</td>
-        <td style="text-align: center;">{{.NumPlays}}</td>
-        <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-        <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
-  {{end}}
-</body>
-<script>
-  // Unescape
-  function unescapeParentheses(str) {
-    return str.replace(/%28/g, "(").replace(/%29/g, ")");
-  }
-
-  // Sort
-  let sortOrders = { name: true, numPlays: true };
-
-  function sortTable(columnIndex, columnKey) {
-    let table = document.getElementById('collectionTable');
-    let rows = Array.from(table.rows).slice(1); // exclude the header row
-    rows.sort(function (rowA, rowB) {
-      let a = rowA.cells[columnIndex].innerText;
-      let b = rowB.cells[columnIndex].innerText;
-      if (columnKey === 'numPlays') { // convert to numbers for correct sorting
-        a = Number(a);
-        b = Number(b);
-        return sortOrders[columnKey] ? a - b : b - a;
-      } else {
-        return sortOrders[columnKey] ? a.localeCompare(b) : b.localeCompare(a);
-      }
-    });
-    rows.forEach(function (row) {
-      table.tBodies[0].appendChild(row);
-    });
-    sortOrders[columnKey] = !sortOrders[columnKey]; // reverse the sort order for the next click
-  }
-
-  document.getElementById('nameHeader').addEventListener('click', function () {
-    sortTable(0, 'name'); // assuming "Name" is the first column
-  });
-
-  document.getElementById('numPlaysHeader').addEventListener('click', function () {
-    sortTable(1, 'numPlays'); // assuming "NumPlays" is the second column
-  });
-
-  // Filter
-  let filters = [
-    { columnIndex: 2, elementId: 'ownFilter' }, // assuming "Own" is the third column
-    { columnIndex: 3, elementId: 'prevOwnedFilter' } // assuming "PrevOwned" is the fourth column
-  ];
-
-  function applyFilters() {
-    let table = document.getElementById('collectionTable');
-    let rows = Array.from(table.rows).slice(1); // exclude the header row
-    rows.forEach(function (row) {
-      let showRow = true;
-      filters.forEach(function (filter) {
-        let cellValue = row.cells[filter.columnIndex].innerText;
-        let filterValue = document.getElementById(filter.elementId).value;
-        showRow = showRow && ((filterValue === 'all') ||
-          (filterValue === 'yes' && cellValue === '✅') ||
-          (filterValue === 'no' && cellValue === ''));
+    function sortTable(columnIndex, columnKey) {
+      let table = document.getElementById('collectionTable');
+      let rows = Array.from(table.rows).slice(1); // exclude the header row
+      rows.sort(function (rowA, rowB) {
+        let a = rowA.cells[columnIndex].innerText;
+        let b = rowB.cells[columnIndex].innerText;
+        if (columnKey === 'numPlays') { // convert to numbers for correct sorting
+          a = Number(a);
+          b = Number(b);
+          return sortOrders[columnKey] ? a - b : b - a;
+        } else {
+          return sortOrders[columnKey] ? a.localeCompare(b) : b.localeCompare(a);
+        }
       });
-      row.style.display = showRow ? '' : 'none';
-    });
-  }
+      rows.forEach(function (row) {
+        table.tBodies[0].appendChild(row);
+      });
+      sortOrders[columnKey] = !sortOrders[columnKey]; // reverse the sort order for the next click
+    }
 
-  filters.forEach(function (filter) {
-    document.getElementById(filter.elementId).addEventListener('change', applyFilters);
-  });
-</script>
+    document.getElementById('nameHeader').addEventListener('click', function () {
+      sortTable(0, 'name'); // assuming "Name" is the first column
+    });
+
+    document.getElementById('numPlaysHeader').addEventListener('click', function () {
+      sortTable(1, 'numPlays'); // assuming "NumPlays" is the second column
+    });
+
+    // Filter
+    let filters = [
+      { columnIndex: 2, elementId: 'ownFilter' }, // assuming "Own" is the third column
+      { columnIndex: 3, elementId: 'prevOwnedFilter' } // assuming "PrevOwned" is the fourth column
+    ];
+
+    function applyFilters() {
+      let table = document.getElementById('collectionTable');
+      let rows = Array.from(table.rows).slice(1); // exclude the header row
+      rows.forEach(function (row) {
+        let showRow = true;
+        filters.forEach(function (filter) {
+          let cellValue = row.cells[filter.columnIndex].innerText;
+          let filterValue = document.getElementById(filter.elementId).value;
+          showRow = showRow && ((filterValue === 'all') ||
+            (filterValue === 'yes' && cellValue === '✅') ||
+            (filterValue === 'no' && cellValue === ''));
+        });
+        row.style.display = showRow ? '' : 'none';
+      });
+    }
+
+    filters.forEach(function (filter) {
+      document.getElementById(filter.elementId).addEventListener('change', applyFilters);
+    });
+  </script>
+</body>
 
 </html>

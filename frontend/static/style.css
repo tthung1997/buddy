@@ -1,0 +1,200 @@
+/* Shared Buddy Styles */
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+body {
+  background: linear-gradient(135deg, #f7f9fb 60%, #e3eafc 100%);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.container {
+  background: #fff;
+  padding: 2.5rem 2rem;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+  text-align: center;
+  min-width: 0;
+  width: 100%;
+  max-width: 900px;
+  margin: 2.5rem auto;
+}
+.wide-container {
+  max-width: 100vw;
+  width: 100vw;
+  border-radius: 0;
+  box-shadow: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 3vw;
+  padding-right: 3vw;
+}
+@media (max-width: 900px) {
+  .container, .wide-container {
+    max-width: 100vw;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1.2rem 0.5rem;
+  }
+}
+h1 {
+  color: #2d3748;
+  margin-bottom: 2rem;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+a, .button-link {
+  display: inline-block;
+  min-width: 120px;
+  margin: 0.5rem 0.5rem 1rem 0.5rem;
+  padding: 1rem 0;
+  background: linear-gradient(90deg, #3182ce 60%, #63b3ed 100%);
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.08);
+  transition: background 0.2s, transform 0.1s;
+}
+a:active, .button-link:active {
+  transform: scale(0.97);
+}
+a:hover, .button-link:hover {
+  background: linear-gradient(90deg, #225ea8 60%, #4299e1 100%);
+}
+form {
+  background: #f7f9fb;
+  border-radius: 10px;
+  padding: 1.2rem;
+  margin: 1.5rem auto 2rem auto;
+  max-width: 700px;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.04);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem 1.5rem;
+  justify-content: center;
+}
+form label {
+  font-weight: 500;
+  color: #2d3748;
+  margin-bottom: 0.2rem;
+}
+form input[type="text"],
+form select {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+form input[type="checkbox"] {
+  margin-left: 0.5rem;
+}
+form button {
+  background: linear-gradient(90deg, #3182ce 60%, #63b3ed 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s, transform 0.1s;
+}
+form button:hover {
+  background: linear-gradient(90deg, #225ea8 60%, #4299e1 100%);
+}
+select {
+  margin: 0 0.5rem 1rem 0;
+}
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  /* Make table fill container on desktop */
+  max-width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.04);
+  min-width: 900px;
+  max-width: 100%;
+}
+th, td {
+  padding: 0.7rem 0.4rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1rem;
+  vertical-align: middle;
+  text-align: center;
+}
+th {
+  background: #f1f5fa;
+  color: #2d3748;
+  font-weight: 600;
+  cursor: pointer;
+}
+tr:last-child td {
+  border-bottom: none;
+}
+td img {
+  max-width: 90px;
+  max-height: 90px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(49,130,206,0.10);
+  display: block;
+  margin: 0 auto;
+}
+.error {
+  color: #e53e3e;
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  table {
+    min-width: 600px;
+  }
+}
+@media (max-width: 700px) {
+  table {
+    min-width: 500px;
+  }
+}
+@media (max-width: 480px) {
+  .container, form {
+    padding: 1.2rem 0.5rem;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+    max-width: 100vw;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  a, .button-link {
+    font-size: 1rem;
+    padding: 0.9rem 0;
+  }
+  table, th, td {
+    font-size: 0.95rem;
+  }
+  table {
+    min-width: 400px;
+  }
+}
