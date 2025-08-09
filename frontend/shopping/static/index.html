@@ -7,13 +7,218 @@
     <link rel="stylesheet" href="/static/style.css">
   </head>
   <body>
-    <div class="container">
+    <div class="container wide-container">
       <h1>Shopping</h1>
       <a href="/" class="button-link">Home</a>
-      <div style="margin: 2rem auto; max-width: 400px;">
-        <!-- Add your shopping content here -->
-        <p style="color: #888;">No shopping items yet.</p>
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-inventory-btn" onclick="showTab('inventory')">Inventory</button>
+        <button class="tab-btn" id="tab-shopping-btn" onclick="showTab('shopping')">Shopping List</button>
       </div>
+      <div id="tab-inventory" class="tab-content" style="display:block;">
+        <form id="add-inventory-form">
+          <input type="text" id="add-item-name" placeholder="Item name" required>
+          <input type="date" id="add-item-date" class="styled-date" required>
+          <input type="text" id="add-item-store" placeholder="Store" required>
+          <button type="submit">Add to Inventory</button>
+        </form>
+        <div class="table-responsive">
+          <h2>Inventory</h2>
+          <table id="inventory-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Purchased Date</th>
+                <th>Store</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Inventory items will be rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="tab-shopping" class="tab-content" style="display:none;">
+        <form id="add-shopping-form">
+          <input type="text" id="add-shopping-name" placeholder="Item name" required>
+          <input type="text" id="add-shopping-store" placeholder="Store">
+          <button type="submit">Add to Shopping List</button>
+        </form>
+        <div class="table-responsive">
+          <h2>Shopping List</h2>
+          <table id="shopping-table">
+            <thead>
+              <tr>
+                <th>Purchased?</th>
+                <th>Item</th>
+                <th>Store</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Shopping list items will be rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <style>
+        .tabs {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+          background: #f1f5fa;
+          color: #2d3748;
+          border: none;
+          border-radius: 10px 10px 0 0;
+          padding: 0.8rem 2.2rem;
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin: 0 0.2rem;
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+        }
+        .tab-btn.active {
+          background: linear-gradient(90deg, #3182ce 60%, #63b3ed 100%);
+          color: #fff;
+        }
+        .tab-content {
+          animation: fadeIn 0.2s;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      </style>
+      <script>
+        function showTab(tab) {
+          document.getElementById('tab-inventory').style.display = tab === 'inventory' ? 'block' : 'none';
+          document.getElementById('tab-shopping').style.display = tab === 'shopping' ? 'block' : 'none';
+          document.getElementById('tab-inventory-btn').classList.toggle('active', tab === 'inventory');
+          document.getElementById('tab-shopping-btn').classList.toggle('active', tab === 'shopping');
+        }
+      </script>
+      <script>
+        // Helper functions for local file storage (simulate with fetch to backend endpoints)
+        async function fetchInventory() {
+          const res = await fetch('/shopping/inventory');
+          return res.json();
+        }
+        async function fetchShoppingList() {
+          const res = await fetch('/shopping/list');
+          return res.json();
+        }
+        async function saveInventory(data) {
+          await fetch('/shopping/inventory', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+        }
+        async function saveShoppingList(data) {
+          await fetch('/shopping/list', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+        }
+
+        // Render functions
+        function renderInventory(items) {
+          const tbody = document.querySelector('#inventory-table tbody');
+          tbody.innerHTML = '';
+          for (const item of items) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td>${item.date}</td>
+              <td>${item.store}</td>
+              <td>
+                <button class="btn btn-danger" onclick="removeFromInventory('${item.name}')">Remove</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+        function renderShoppingList(items) {
+          const tbody = document.querySelector('#shopping-table tbody');
+          tbody.innerHTML = '';
+          for (const item of items) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><input type="checkbox" class="styled-checkbox" onchange="markPurchased('${item.name}')"></td>
+              <td>${item.name}</td>
+              <td>${item.store||''}</td>
+              <td><button class="btn btn-danger" onclick="removeFromShopping('${item.name}')">Remove</button></td>
+            `;
+            tbody.appendChild(tr);
+          }
+        }
+
+        // Inventory actions
+        async function removeFromInventory(name) {
+          let inventory = await fetchInventory();
+          let shopping = await fetchShoppingList();
+          const idx = inventory.findIndex(i => i.name === name);
+          if (idx !== -1) {
+            if (confirm('Add to shopping list?')) {
+              shopping.push({name: inventory[idx].name, store: inventory[idx].store});
+              await saveShoppingList(shopping);
+            }
+            inventory.splice(idx, 1);
+            await saveInventory(inventory);
+            loadData();
+          }
+        }
+
+        // Shopping list actions
+        async function removeFromShopping(name) {
+          let shopping = await fetchShoppingList();
+          const idx = shopping.findIndex(i => i.name === name);
+          if (idx !== -1) {
+            shopping.splice(idx, 1);
+            await saveShoppingList(shopping);
+            loadData();
+          }
+        }
+        async function markPurchased(name) {
+          let shopping = await fetchShoppingList();
+          let inventory = await fetchInventory();
+          const idx = shopping.findIndex(i => i.name === name);
+          if (idx !== -1) {
+            const date = prompt('Enter purchase date (YYYY-MM-DD):', new Date().toISOString().slice(0,10));
+            const store = prompt('Enter store:', shopping[idx].store||'');
+            inventory.push({name: shopping[idx].name, date, store});
+            shopping.splice(idx, 1);
+            await saveInventory(inventory);
+            await saveShoppingList(shopping);
+            loadData();
+          }
+        }
+
+        // Add forms
+        document.getElementById('add-inventory-form').onsubmit = async function(e) {
+          e.preventDefault();
+          let inventory = await fetchInventory();
+          const name = document.getElementById('add-item-name').value;
+          const date = document.getElementById('add-item-date').value;
+          const store = document.getElementById('add-item-store').value;
+          inventory.push({name, date, store});
+          await saveInventory(inventory);
+          this.reset();
+          loadData();
+        };
+        document.getElementById('add-shopping-form').onsubmit = async function(e) {
+          e.preventDefault();
+          let shopping = await fetchShoppingList();
+          const name = document.getElementById('add-shopping-name').value;
+          const store = document.getElementById('add-shopping-store').value;
+          shopping.push({name, store});
+          await saveShoppingList(shopping);
+          this.reset();
+          loadData();
+        };
+
+        // Initial load
+        async function loadData() {
+          renderInventory(await fetchInventory());
+          renderShoppingList(await fetchShoppingList());
+        }
+        loadData();
+      </script>
     </div>
   </body>
 </html>

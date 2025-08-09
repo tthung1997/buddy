@@ -39,6 +39,8 @@ func main() {
 
 	// shopping
 	http.HandleFunc("/shopping", logging(shopping.Index))
+	http.HandleFunc("/shopping/inventory", logging(shopping.InventoryHandler))
+	http.HandleFunc("/shopping/list", logging(shopping.ShoppingListHandler))
 
 	log.Println("Listening on port 2210")
 	err := http.ListenAndServe(":2210", nil)
