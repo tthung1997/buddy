@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -32,6 +33,55 @@ const boardgamesStaticDir = "frontend/boardgames/static"
 
 var indexTmpl *template.Template = template.Must(template.ParseFiles(boardgamesStaticDir + "/index.html"))
 var pickTmpl *template.Template = template.Must(template.ParseFiles(boardgamesStaticDir + "/pick.html"))
+
+// --- Backed/Preordered Tracker ---
+type BackedGame struct {
+	Name      string
+	Delivery  string  // month/year
+	PricePaid float64 // Price paid for the game
+	From      string  // Where the game was backed from
+	Platform  string  // Platform for the game (e.g., Steam, Epic)
+	Received  bool    // Whether the game has been received
+}
+
+type BackedPageData struct {
+	Error   error
+	Success string
+	Items   []BackedGame
+	AddName string
+}
+
+const backedDataFile = "frontend/boardgames/.db/backed_boardgames.json"
+
+var backedTmpl *template.Template = template.Must(template.ParseFiles(boardgamesStaticDir + "/backed.html"))
+
+// loadBackedGames loads the backed games from the JSON file
+func loadBackedGames() ([]BackedGame, error) {
+	f, err := os.Open(backedDataFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return []BackedGame{}, nil
+		}
+		return nil, err
+	}
+	defer f.Close()
+	var items []BackedGame
+	err = json.NewDecoder(f).Decode(&items)
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+// saveBackedGames saves the backed games to the JSON file
+func saveBackedGames(items []BackedGame) error {
+	f, err := os.Create(backedDataFile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return json.NewEncoder(f).Encode(items)
+}
 
 func getFilter(params url.Values) bgg.CollectionFilter {
 	// Construct filter
@@ -177,4 +227,81 @@ func (c *BoardGamesController) Pick(w http.ResponseWriter, r *http.Request) {
 	pickTmpl.Execute(w, PickPageData{
 		Items: pickedItems,
 	})
+}
+
+// Backed handles the backed games page
+func (c *BoardGamesController) Backed(w http.ResponseWriter, r *http.Request) {
+	items, _ := loadBackedGames()
+	data := BackedPageData{Items: items}
+	if name := r.URL.Query().Get("name"); name != "" {
+		data.AddName = name
+	}
+	backedTmpl.Execute(w, data)
+}
+
+// Add new backed game
+func (c *BoardGamesController) BackedAdd(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
+		return
+	}
+	items, _ := loadBackedGames()
+	price, _ := strconv.ParseFloat(r.FormValue("price"), 64)
+	game := BackedGame{
+		Name:      r.FormValue("name"),
+		Delivery:  r.FormValue("delivery"),
+		PricePaid: price,
+		From:      r.FormValue("from"),
+		Platform:  r.FormValue("platform"),
+		Received:  false,
+	}
+	items = append(items, game)
+	saveBackedGames(items)
+	http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
+}
+
+// Mark as received
+func (c *BoardGamesController) BackedReceive(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
+		return
+	}
+	items, _ := loadBackedGames()
+	idx, _ := strconv.Atoi(r.FormValue("idx"))
+	if idx >= 0 && idx < len(items) {
+		items[idx].Received = true
+		saveBackedGames(items)
+	}
+	http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
+}
+
+// Edit backed game (GET: show form, POST: save changes)
+func (c *BoardGamesController) BackedEdit(w http.ResponseWriter, r *http.Request) {
+	items, _ := loadBackedGames()
+	idx, _ := strconv.Atoi(r.FormValue("idx"))
+	if r.Method == http.MethodGet {
+		if idx < 0 || idx >= len(items) {
+			http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
+			return
+		}
+		game := items[idx]
+		// Render edit form (reuse backed.html for simplicity, pre-fill .AddName and other fields)
+		data := BackedPageData{Items: items, AddName: game.Name}
+		backedTmpl.Execute(w, data)
+		return
+	}
+	// POST: update
+	if idx >= 0 && idx < len(items) {
+		price, _ := strconv.ParseFloat(r.FormValue("price"), 64)
+		items[idx] = BackedGame{
+			Name:      r.FormValue("name"),
+			Delivery:  r.FormValue("delivery"),
+			PricePaid: price,
+			From:      r.FormValue("from"),
+			Platform:  r.FormValue("platform"),
+			Received:  items[idx].Received,
+		}
+		saveBackedGames(items)
+	}
+	http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
 }

@@ -13,6 +13,7 @@
     <h1>Board Games</h1>
     <a href="/" class="button-link">Home</a>
     <a href="/boardgames/pick" class="button-link">Pick</a>
+    <a href="/boardgames/backed" class="button-link">Backed</a>
     <form action="/boardgames" method="GET">
       <label for="username">Filter by username:</label>
       <input type="text" id="username" name="username" placeholder="tthung1997">
@@ -65,6 +66,13 @@
             <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
             <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
             <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
+            {{if eq .Status.Preordered 1}}
+              <td>
+                <a href="/boardgames/backed?name={{.Name}}" class="button-link">Track</a>
+              </td>
+            {{else}}
+              <td></td>
+            {{end}}
           </tr>
           {{end}}
         </tbody>

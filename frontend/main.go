@@ -36,6 +36,11 @@ func main() {
 	bgController := boardgames.NewBoardGamesController(bggClient, randomizer)
 	http.HandleFunc("/boardgames", logging(bgController.Index))
 	http.HandleFunc("/boardgames/pick", logging(bgController.Pick))
+	// backed/preordered tracker
+	http.HandleFunc("/boardgames/backed", logging(bgController.Backed))
+	http.HandleFunc("/boardgames/backed/add", logging(bgController.BackedAdd))
+	http.HandleFunc("/boardgames/backed/receive", logging(bgController.BackedReceive))
+	http.HandleFunc("/boardgames/backed/edit", logging(bgController.BackedEdit))
 
 	// shopping
 	http.HandleFunc("/shopping", logging(shopping.Index))

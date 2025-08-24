@@ -267,3 +267,18 @@ td img {
     min-width: 400px;
   }
 }
+
+/* Boardgames Tracker Form Inputs */
+.form-input {
+    padding: 6px 10px;
+    font-size: 1rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    width: 180px;
+    box-sizing: border-box;
+    height: 38px;
+    vertical-align: middle;
+}
+.add-form label {
+    margin-bottom: 4px;
+}
