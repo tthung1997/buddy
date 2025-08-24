@@ -51,6 +51,7 @@
             <th>WantToBuy</th>
             <th>Wishlist</th>
             <th>Preordered</th>
+            <th>Track</th>
           </tr>
         </thead>
         <tbody>
@@ -67,11 +68,11 @@
             <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
             <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
             {{if eq .Status.Preordered 1}}
-              <td>
-                <a href="/boardgames/backed?name={{.Name}}" class="button-link">Track</a>
-              </td>
+            <td>
+              <a href="/boardgames/backed?name={{.Name}}" class="small-table-btn">Track</a>
+            </td>
             {{else}}
-              <td></td>
+            <td></td>
             {{end}}
           </tr>
           {{end}}

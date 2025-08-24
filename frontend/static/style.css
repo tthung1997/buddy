@@ -283,3 +283,37 @@ td img {
 .add-form label {
     margin-bottom: 4px;
 }
+
+/* Boardgames Tracker Conditional Row Colors */
+.tr-received {
+    background: #d6f5d6 !important; /* pastel green */
+}
+.tr-late {
+    background: #ffe5e5 !important; /* pastel red */
+}
+
+/* Small Table Button Styles */
+.small-table-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #3182ce;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0 8px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin: 0;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: none;
+  text-decoration: none;
+  line-height: 1.1;
+  min-width: 0;
+  height: 22px;
+  vertical-align: middle;
+}
+.small-table-btn:hover {
+  background: #225ea8;
+}

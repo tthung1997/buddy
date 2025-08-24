@@ -37,18 +37,21 @@ var pickTmpl *template.Template = template.Must(template.ParseFiles(boardgamesSt
 // --- Backed/Preordered Tracker ---
 type BackedGame struct {
 	Name      string
-	Delivery  string  // month/year
+	Delivery  string  // YYYY-MM
 	PricePaid float64 // Price paid for the game
 	From      string  // Where the game was backed from
 	Platform  string  // Platform for the game (e.g., Steam, Epic)
 	Received  bool    // Whether the game has been received
+	RowClass  string  // CSS class for row coloring
 }
 
 type BackedPageData struct {
-	Error   error
-	Success string
-	Items   []BackedGame
-	AddName string
+	Error        error
+	Success      string
+	Items        []BackedGame
+	AddName      string
+	CurrentYear  int
+	CurrentMonth int
 }
 
 const backedDataFile = "frontend/boardgames/.db/backed_boardgames.json"
@@ -238,12 +241,64 @@ func (c *BoardGamesController) Pick(w http.ResponseWriter, r *http.Request) {
 
 // Backed handles the backed games page
 func (c *BoardGamesController) Backed(w http.ResponseWriter, r *http.Request) {
-	items, _ := loadBackedGames()
-	data := BackedPageData{Items: items}
+	items, err := loadBackedGames()
+	if err != nil {
+		http.Error(w, "Failed to load backed games: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Parse delivery year/month for each item, store in parallel slices
+	deliveryYears := make([]int, len(items))
+	deliveryMonths := make([]int, len(items))
+	for i := range items {
+		rowClass := ""
+		if len(items[i].Delivery) == 7 {
+			y, errY := strconv.Atoi(items[i].Delivery[:4])
+			m, errM := strconv.Atoi(items[i].Delivery[5:])
+			if errY == nil && errM == nil {
+				deliveryYears[i] = y
+				deliveryMonths[i] = m
+				now := time.Now()
+				cy := now.Year()
+				cm := int(now.Month())
+				isLate := !items[i].Received && (y < cy || (y == cy && m < cm))
+				if items[i].Received {
+					rowClass = "tr-received"
+				} else if isLate {
+					rowClass = "tr-late"
+				}
+			}
+		} else if items[i].Received {
+			rowClass = "tr-received"
+		}
+		items[i].RowClass = rowClass
+	}
+	if len(items) == 0 {
+		http.Error(w, "No backed games loaded. Check JSON file and parsing.", http.StatusInternalServerError)
+		return
+	}
+	now := time.Now()
+	data := BackedPageData{
+		Items:        items,
+		CurrentYear:  now.Year(),
+		CurrentMonth: int(now.Month()),
+	}
+	// Pass deliveryYears and deliveryMonths as extra fields if needed
+	// If name := r.URL.Query().Get("name"); name != "" {
 	if name := r.URL.Query().Get("name"); name != "" {
 		data.AddName = name
 	}
-	backedTmpl.Execute(w, data)
+	// Attach slices to context for template via map
+	ctx := map[string]interface{}{
+		"Error":          data.Error,
+		"Success":        data.Success,
+		"Items":          data.Items,
+		"AddName":        data.AddName,
+		"CurrentYear":    data.CurrentYear,
+		"CurrentMonth":   data.CurrentMonth,
+		"DeliveryYears":  deliveryYears,
+		"DeliveryMonths": deliveryMonths,
+	}
+	backedTmpl.Execute(w, ctx)
 }
 
 // Add new backed game
@@ -279,7 +334,8 @@ func (c *BoardGamesController) BackedReceive(w http.ResponseWriter, r *http.Requ
 	items, _ := loadBackedGames()
 	idx, _ := strconv.Atoi(r.FormValue("idx"))
 	if idx >= 0 && idx < len(items) {
-		items[idx].Received = true
+		received := r.FormValue("received") == "true"
+		items[idx].Received = received
 		saveBackedGames(items)
 	}
 	http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)

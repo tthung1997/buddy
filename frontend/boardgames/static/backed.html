@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <link rel="stylesheet" href="/static/style.css">
-    <title>Boardgames Tracker</title>
+    <title>Incoming Games</title>
 </head>
 
 <body>
     <div class="container wide-container">
-        <h1>Backed / Preordered Boardgames Tracker</h1>
+        <h1>Incoming Games</h1>
         <a href="/boardgames" class="button-link">Boardgames</a>
         {{if .Error}}
         <p><span class="error">Error: {{.Error}}</span></p>
@@ -58,6 +58,12 @@
                 </div>
             </div>
         </form>
+        <form id="filter-form" style="margin-bottom: 16px;">
+            <label>Show:</label>
+            <label><input type="checkbox" class="filter-checkbox" value="received" checked> Received</label>
+            <label><input type="checkbox" class="filter-checkbox" value="late" checked> Late</label>
+            <label><input type="checkbox" class="filter-checkbox" value="waiting" checked> Waiting</label>
+        </form>
         <div class="table-responsive">
             <table id="collectionTable">
                 <thead>
@@ -71,18 +77,21 @@
                         <th style="text-align: center;">Edit</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="backed-tbody">
                     {{range $i, $game := .Items}}
-                    <tr {{if $game.Received}}class="received" {{end}}>
+                    <tr class="{{$game.RowClass}}"
+                        data-status="{{if $game.Received}}received{{else if eq $game.RowClass "tr-late"}}late{{else}}waiting{{end}}">
                         <td>{{$game.Name}}</td>
                         <td>{{$game.Delivery}}</td>
                         <td style="text-align: center;">${{printf "%.2f" $game.PricePaid}}</td>
                         <td>{{$game.From}}</td>
                         <td>{{$game.Platform}}</td>
-                        <td style="text-align: center;">{{if $game.Received}}✅{{else}}<button class="button-link"
-                                onclick="markReceived('{{$i}}')">Mark Received</button>{{end}}</td>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="received-checkbox" data-idx="{{$i}}"
+                                {{if $game.Received}}checked{{end}}>
+                        </td>
                         <td style="text-align: center;"><a href="/boardgames/backed/edit?idx={{$i}}"
-                                class="button-link">Edit</a></td>
+                                class="small-table-btn">Edit</a></td>
                     </tr>
                     {{end}}
                 </tbody>
@@ -91,17 +100,23 @@
     </div>
 </body>
 <script>
-    function markReceived(idx) {
-        fetch('/boardgames/backed/receive', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'idx=' + encodeURIComponent(Number(idx))
-        }).then(() => {
-            window.location.reload();
+    document.querySelectorAll('.received-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            var idx = this.getAttribute('data-idx');
+            var formData = new URLSearchParams();
+            formData.append('idx', idx);
+            formData.append('received', this.checked ? 'true' : 'false');
+            fetch('/boardgames/backed/receive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData.toString()
+            }).then(() => {
+                window.location.reload();
+            });
         });
-    }
+    });
     // Table sorting (Name, Delivery, Price columns)
     function sortTable(n) {
         var table = document.getElementById("collectionTable");
@@ -129,6 +144,22 @@
         });
         table.setAttribute('data-sort-dir-' + n, dir === 'asc' ? 'desc' : 'asc');
     }
+
+    function updateFilter() {
+        var checked = Array.from(document.querySelectorAll('.filter-checkbox:checked')).map(cb => cb.value);
+        var rows = document.querySelectorAll('#backed-tbody tr');
+        rows.forEach(function(row) {
+            if (checked.includes(row.getAttribute('data-status'))) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    document.querySelectorAll('.filter-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', updateFilter);
+    });
+    updateFilter();
 </script>
 
 </html>
