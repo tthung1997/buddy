@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8">
     <link rel="stylesheet" href="/static/style.css">
     <title>Boardgames Tracker</title>
 </head>
+
 <body>
     <div class="container wide-container">
         <h1>Backed / Preordered Boardgames Tracker</h1>
@@ -16,62 +18,117 @@
         {{if .Success}}
         <p><span class="success">{{.Success}}</span></p>
         {{end}}
-        <form class="add-form" method="POST" action="{{if .AddName}}/boardgames/backed/edit{{else}}/boardgames/backed/add{{end}}" style="margin-bottom: 24px;">
-            <input type="hidden" name="idx" value="{{if .AddName}}{{range $i, $game := .Items}}{{if eq $game.Name $.AddName}}{{$i}}{{end}}{{end}}{{end}}">
+        <form class="add-form" method="POST"
+            action="{{if .AddName}}/boardgames/backed/edit{{else}}/boardgames/backed/add{{end}}"
+            style="margin-bottom: 24px;">
+            <input type="hidden" name="idx"
+                value="{{if .AddName}}{{range $i, $game := .Items}}{{if eq $game.Name $.AddName}}{{$i}}{{end}}{{end}}{{end}}">
             <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start;">
                 <div style="display: flex; flex-direction: column;">
                     <label for="name">Name</label>
-                        <input type="text" id="name" name="name" required value="{{.AddName}}" class="form-input">
+                    <input type="text" id="name" name="name" required value="{{.AddName}}" class="form-input">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <label for="delivery">Expected Delivery</label>
-                        <input type="month" id="delivery" name="delivery" required value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.Delivery}}{{end}}{{end}}{{end}}" class="form-input">
+                    <input type="month" id="delivery" name="delivery" required
+                        value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.Delivery}}{{end}}{{end}}{{end}}"
+                        class="form-input">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <label for="price">Price Paid</label>
-                        <input type="number" id="price" name="price" required value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.PricePaid}}{{end}}{{end}}{{end}}" class="form-input">
+                    <input type="number" id="price" name="price" required
+                        value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.PricePaid}}{{end}}{{end}}{{end}}"
+                        class="form-input">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <label for="from">Backed/Preordered From</label>
-                        <input type="text" id="from" name="from" required value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.From}}{{end}}{{end}}{{end}}" class="form-input">
+                    <input type="text" id="from" name="from" required
+                        value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.From}}{{end}}{{end}}{{end}}"
+                        class="form-input">
                 </div>
                 <div style="display: flex; flex-direction: column;">
                     <label for="platform">Pledge Manager Platform</label>
-                        <input type="text" id="platform" name="platform" value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.Platform}}{{end}}{{end}}{{end}}" class="form-input">
+                    <input type="text" id="platform" name="platform"
+                        value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.Platform}}{{end}}{{end}}{{end}}"
+                        class="form-input">
                 </div>
                 <div style="display: flex; flex-direction: column; justify-content: flex-end; height: 100%;">
-                    <button type="submit" style="margin-top: 22px;">{{if .AddName}}Save Changes{{else}}Add Boardgame{{end}}</button>
+                    <button type="submit" style="margin-top: 22px;">{{if .AddName}}Save Changes{{else}}Add
+                        Boardgame{{end}}</button>
                 </div>
             </div>
         </form>
-            <div class="table-responsive">
-                <table id="collectionTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Expected Delivery</th>
-                            <th style="text-align: center;">Price Paid</th>
-                            <th>Backed/Preordered From</th>
-                            <th>Pledge Manager Platform</th>
-                            <th style="text-align: center;">Received</th>
-                            <th style="text-align: center;">Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{range $i, $game := .Items}}
-                        <tr {{if $game.Received}}class="received"{{end}}>
-                            <td>{{$game.Name}}</td>
-                            <td>{{$game.Delivery}}</td>
-                            <td style="text-align: center;">{{$game.PricePaid}}</td>
-                            <td>{{$game.From}}</td>
-                            <td>{{$game.Platform}}</td>
-                            <td style="text-align: center;">{{if $game.Received}}✅{{else}}<form method="POST" action="/boardgames/backed/receive" style="display:inline;"><input type="hidden" name="idx" value="{{$i}}"><button type="submit">Mark Received</button></form>{{end}}</td>
-                            <td style="text-align: center;"><a href="/boardgames/backed/edit?idx={{$i}}" class="button-link">Edit</a></td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive">
+            <table id="collectionTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">Name &#x25B2;&#x25BC;</th>
+                        <th onclick="sortTable(1)">Expected Delivery &#x25B2;&#x25BC;</th>
+                        <th style="text-align: center;" onclick="sortTable(2)">Price Paid &#x25B2;&#x25BC;</th>
+                        <th>Backed/Preordered From</th>
+                        <th>Pledge Manager Platform</th>
+                        <th style="text-align: center;">Received</th>
+                        <th style="text-align: center;">Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $i, $game := .Items}}
+                    <tr {{if $game.Received}}class="received" {{end}}>
+                        <td>{{$game.Name}}</td>
+                        <td>{{$game.Delivery}}</td>
+                        <td style="text-align: center;">${{printf "%.2f" $game.PricePaid}}</td>
+                        <td>{{$game.From}}</td>
+                        <td>{{$game.Platform}}</td>
+                        <td style="text-align: center;">{{if $game.Received}}✅{{else}}<button class="button-link"
+                                onclick="markReceived('{{$i}}')">Mark Received</button>{{end}}</td>
+                        <td style="text-align: center;"><a href="/boardgames/backed/edit?idx={{$i}}"
+                                class="button-link">Edit</a></td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
+<script>
+    function markReceived(idx) {
+        fetch('/boardgames/backed/receive', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'idx=' + encodeURIComponent(Number(idx))
+        }).then(() => {
+            window.location.reload();
+        });
+    }
+    // Table sorting (Name, Delivery, Price columns)
+    function sortTable(n) {
+        var table = document.getElementById("collectionTable");
+        var rows = Array.from(table.tBodies[0].rows);
+        var dir = table.getAttribute('data-sort-dir-' + n) || 'asc';
+        var isNumeric = (n === 2); // Price column
+        rows.sort(function (a, b) {
+            var x = a.cells[n].innerText.trim();
+            var y = b.cells[n].innerText.trim();
+            if (isNumeric) {
+                x = parseFloat(x.replace(/[^\d\.]/g, ''));
+                y = parseFloat(y.replace(/[^\d\.]/g, ''));
+            }
+            if (dir === 'asc') {
+                return x > y ? 1 : x < y ? -1 : 0;
+            } else {
+                return x < y ? 1 : x > y ? -1 : 0;
+            }
+        });
+        while (table.tBodies[0].rows.length) {
+            table.tBodies[0].deleteRow(0);
+        }
+        rows.forEach(function (row) {
+            table.tBodies[0].appendChild(row);
+        });
+        table.setAttribute('data-sort-dir-' + n, dir === 'asc' ? 'desc' : 'asc');
+    }
+</script>
+
 </html>

@@ -123,19 +123,20 @@ h1 {
   letter-spacing: 1px;
   font-weight: 700;
 }
-a, .button-link {
+a, .button-link, button.button-link {
   display: inline-block;
   min-width: 120px;
-  margin: 0.5rem 0.5rem 1rem 0.5rem;
-  padding: 1rem 0;
-  background: linear-gradient(90deg, #3182ce 60%, #63b3ed 100%);
-  color: #fff;
-  border-radius: 10px;
-  text-decoration: none;
-  font-size: 1.15rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(49,130,206,0.08);
-  transition: background 0.2s, transform 0.1s;
+  margin: 0.5rem 0.5rem 1rem 0.5rem !important;
+  padding: 1rem 1.1rem !important;
+  background: linear-gradient(90deg, #3182ce 60%, #63b3ed 100%) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(49,130,206,0.08) !important;
+  transition: background 0.2s, transform 0.1s !important;
+  border: none !important;
 }
 a:active, .button-link:active {
   transform: scale(0.97);

@@ -75,6 +75,13 @@ func loadBackedGames() ([]BackedGame, error) {
 
 // saveBackedGames saves the backed games to the JSON file
 func saveBackedGames(items []BackedGame) error {
+	// Ensure .db directory exists
+	dbDir := "frontend/boardgames/.db"
+	if _, err := os.Stat(dbDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dbDir, 0755); err != nil {
+			return err
+		}
+	}
 	f, err := os.Create(backedDataFile)
 	if err != nil {
 		return err
@@ -256,7 +263,10 @@ func (c *BoardGamesController) BackedAdd(w http.ResponseWriter, r *http.Request)
 		Received:  false,
 	}
 	items = append(items, game)
-	saveBackedGames(items)
+	if err := saveBackedGames(items); err != nil {
+		http.Error(w, "Failed to save backed games: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 	http.Redirect(w, r, "/boardgames/backed", http.StatusSeeOther)
 }
 
