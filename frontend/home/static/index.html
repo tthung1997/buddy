@@ -3,16 +3,434 @@
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
     <title>Buddy</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+      body.home-page {
+        margin: 0;
+        padding: 0;
+        background: var(--color-surface-container);
+      }
+
+      .home-hero {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 1fr);
+        gap: 1.5rem;
+        align-items: stretch;
+        overflow: hidden;
+        max-width: none;
+        padding: 2rem;
+        text-align: left;
+        background:
+          radial-gradient(circle at top right, color-mix(in srgb, var(--color-primary-container) 78%, transparent) 0, transparent 48%),
+          linear-gradient(135deg, color-mix(in srgb, var(--color-surface-strong) 88%, var(--color-primary-container) 12%) 0%, var(--color-surface-strong) 100%);
+      }
+
+      .home-hero .section-heading,
+      .home-directory-shell .section-heading,
+      .home-overview-panel .section-heading {
+        gap: 0.85rem;
+      }
+
+      .home-hero-copy {
+        display: grid;
+        gap: 1.5rem;
+        align-content: center;
+      }
+
+      .home-kicker,
+      .home-section-kicker {
+        min-height: auto;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        color: var(--color-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .home-hero-copy h1 {
+        max-width: 12ch;
+        font-size: clamp(3.25rem, 7vw, 5.5rem);
+        line-height: 0.94;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+        text-wrap: balance;
+      }
+
+      .home-hero-copy h1 span {
+        color: var(--color-primary);
+      }
+
+      .home-hero-copy p {
+        max-width: 42rem;
+        font-size: clamp(1.05rem, 1.4vw, 1.25rem);
+        line-height: 1.65;
+        color: color-mix(in srgb, var(--color-on-surface-muted) 80%, var(--color-on-surface) 20%);
+      }
+
+      .home-hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .home-hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        align-items: center;
+      }
+
+      .home-hero-note {
+        color: var(--color-on-surface-muted);
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+
+      .home-hero-note strong,
+      .home-overview-item strong,
+      .home-module-body h3 {
+        color: var(--color-on-surface);
+      }
+
+      .home-hero-meta .chip,
+      .home-directory-note .badge,
+      .home-module-footer .badge {
+        min-height: auto;
+        padding: 0.22rem 0.6rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .home-overview-panel {
+        display: grid;
+        gap: 1rem;
+        padding: 1.25rem;
+        border: 1px solid color-mix(in srgb, var(--color-primary) 10%, var(--color-outline-variant));
+        border-radius: var(--radius-md);
+        background: color-mix(in srgb, var(--color-surface-strong) 72%, var(--color-primary-container) 28%);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .home-overview-panel .section-heading h2 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+      }
+
+      .home-overview-panel .section-heading p,
+      .home-directory-shell .section-heading p,
+      .home-module-body p {
+        font-size: 0.98rem;
+        line-height: 1.6;
+      }
+
+      .home-overview-list {
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .home-overview-item {
+        display: grid;
+        gap: 0.35rem;
+        padding: 1rem;
+        border: 1px solid var(--color-outline-variant);
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--color-surface-strong) 90%, transparent);
+      }
+
+      .home-overview-item strong {
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .home-overview-item p {
+        font-size: 0.88rem;
+        line-height: 1.55;
+      }
+
+      .home-overview-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+
+      .home-directory-shell .card-header {
+        align-items: flex-end;
+      }
+
+      .home-directory-shell .card-body {
+        display: grid;
+        gap: 1.25rem;
+        padding-top: 1.25rem;
+      }
+
+      .home-directory-shell .section-heading h2 {
+        font-size: clamp(1.6rem, 2.2vw, 2rem);
+        font-weight: 650;
+        letter-spacing: -0.03em;
+      }
+
+      .home-directory-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+        gap: 1rem;
+      }
+
+      .home-module-card {
+        display: grid;
+        gap: 1.25rem;
+        height: 100%;
+        padding: 1.5rem;
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--color-surface-strong) 92%, transparent) 0%, color-mix(in srgb, var(--color-primary-container) 10%, var(--color-surface-strong)) 100%);
+      }
+
+      .home-module-card:hover {
+        color: inherit;
+      }
+
+      .home-module-top {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .home-module-body {
+        flex: 1 1 auto;
+        gap: 0.85rem;
+      }
+
+      .home-module-body .badge {
+        align-self: flex-start;
+        min-height: auto;
+        padding: 0;
+        background: transparent;
+        border-radius: 0;
+        color: var(--color-primary);
+        font-size: 0.72rem;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .home-module-body h3 {
+        margin-bottom: 0;
+        font-size: clamp(1.4rem, 2vw, 1.75rem);
+        line-height: 1.1;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+      }
+
+      .home-module-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .home-module-meta .chip {
+        min-height: auto;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .home-module-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: auto;
+      }
+
+      .home-module-link {
+        color: var(--color-primary);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .home-directory-note {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 82%, transparent);
+      }
+
+      .home-directory-note p {
+        max-width: 46rem;
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 900px) {
+        .home-hero {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .home-hero {
+          padding: 1.5rem;
+        }
+
+        .home-directory-note,
+        .home-module-footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
   </head>
-  <body>
-    <div class="container">
-      <h1>Buddy</h1>
-      <div style="max-width: 400px; margin: 2rem auto;">
-        <a href="/boardgames" class="button-link">Board Games</a>
-        <a href="/shopping" class="button-link">Shopping</a>
-      </div>
+  <body class="home-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link" aria-current="page">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <section class="page-intro hero-card home-hero" aria-labelledby="home-hero-title">
+          <div class="home-hero-copy">
+            <div class="section-heading">
+              <span class="badge home-kicker">Buddy hub</span>
+              <h1 id="home-hero-title">A <span>scalable home base</span> for every module you add.</h1>
+              <p>Buddy starts with the tools you need today and leaves room for the ones you will add later. The shell stays familiar while the directory keeps expanding as new focused modules arrive.</p>
+            </div>
+            <div class="home-hero-actions">
+              <a href="#home-module-directory" class="button-link">Browse modules</a>
+            </div>
+            <div class="home-hero-meta" aria-label="Buddy hub highlights">
+              <span class="chip active">Shared shell</span>
+              <span class="chip">Focused modules</span>
+              <span class="chip">Growth-ready layout</span>
+            </div>
+            <p class="home-hero-note">Board Games and Shopping are the first available modules, and the home layout is built to keep welcoming more without another redesign.</p>
+          </div>
+
+          <aside class="home-overview-panel" aria-label="Buddy platform overview">
+            <div class="section-heading">
+              <h2>Built as a hub, not a pair</h2>
+              <p>The homepage now frames Buddy as a single platform: one place to discover modules, move between them, and grow the workspace over time.</p>
+            </div>
+            <div class="home-overview-list">
+              <div class="home-overview-item">
+                <strong>Consistent shell</strong>
+                <p>Navigation, theme controls, and shared patterns stay familiar no matter how many modules Buddy gains.</p>
+              </div>
+              <div class="home-overview-item">
+                <strong>Focused modules</strong>
+                <p>Each workspace can stay purpose-built while still feeling connected to the rest of the product.</p>
+              </div>
+              <div class="home-overview-item">
+                <strong>Expandable directory</strong>
+                <p>The main content scales from the first modules to a larger catalog without reshaping the entire page.</p>
+              </div>
+            </div>
+            <div class="home-overview-footer" aria-label="Buddy platform traits">
+              <span class="badge">Modules live now</span>
+              <span class="badge">Ready for more</span>
+            </div>
+          </aside>
+        </section>
+
+        <section class="card-shell home-directory-shell" id="home-module-directory" aria-labelledby="home-module-directory-title">
+          <div class="card-header">
+            <div class="section-heading">
+              <h2 id="home-module-directory-title">Module directory</h2>
+              <p>Start with the currently available modules below. As Buddy grows, this directory can keep adding cards without changing how the homepage works.</p>
+            </div>
+            <span class="badge home-section-kicker">Available now</span>
+          </div>
+          <div class="card-body">
+            <div class="home-directory-grid" aria-label="Buddy modules">
+              <a href="/boardgames" class="feature-card home-module-card">
+                <div class="home-module-top">
+                  <div class="icon-circle icon-blue" aria-hidden="true">🎲</div>
+                  <div class="stack home-module-body">
+                    <span class="badge">Game night planning</span>
+                    <h3>Board Games</h3>
+                    <p>Browse your collection, surface something worth playing, and keep backed titles visible inside one connected Buddy module.</p>
+                  </div>
+                </div>
+                <div class="home-module-meta" aria-label="Board Games features">
+                  <span class="chip active">Collection browser</span>
+                  <span class="chip">Random picker</span>
+                  <span class="chip">Backed tracker</span>
+                </div>
+                <div class="home-module-footer">
+                  <span class="home-module-link">Open module</span>
+                  <span class="badge">Available now</span>
+                </div>
+              </a>
+
+              <a href="/shopping" class="feature-card home-module-card">
+                <div class="home-module-top">
+                  <div class="icon-circle icon-green" aria-hidden="true">🛒</div>
+                  <div class="stack home-module-body">
+                    <span class="badge">Everyday essentials</span>
+                    <h3>Shopping</h3>
+                    <p>Keep pantry inventory current, maintain the next shopping run, and manage both views in another focused Buddy module.</p>
+                  </div>
+                </div>
+                <div class="home-module-meta" aria-label="Shopping features">
+                  <span class="chip active">Inventory</span>
+                  <span class="chip">Shopping list</span>
+                  <span class="chip">Quick updates</span>
+                </div>
+                <div class="home-module-footer">
+                  <span class="home-module-link">Open module</span>
+                  <span class="badge">Available now</span>
+                </div>
+              </a>
+            </div>
+
+            <div class="home-directory-note">
+              <p>New modules can slot into this directory as Buddy expands, while the hero and platform overview continue to explain the product at the hub level instead of around a fixed number of destinations.</p>
+              <span class="badge">Built to keep growing</span>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   </body>
 </html>

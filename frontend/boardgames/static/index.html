@@ -4,99 +4,183 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
+  <script src="/static/theme.js"></script>
   <link rel="stylesheet" href="/static/style.css">
   <title>Board Games</title>
 </head>
 
-<body>
-  <div class="container wide-container">
-    <h1>Board Games</h1>
-    <a href="/" class="button-link">Home</a>
-    <a href="/boardgames/pick" class="button-link">Pick</a>
-    <a href="/boardgames/backed" class="button-link">Backed</a>
-    <form action="/boardgames" method="GET">
-      <label for="username">Filter by username:</label>
-      <input type="text" id="username" name="username" placeholder="tthung1997">
-      <label for="excludeExpansion">Exclude Expansion:
-        <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
-      </label>
-      <button type="submit">Submit</button>
-    </form>
-    <label for="ownFilter">Own:</label>
-    <select id="ownFilter">
-      <option value="all">All</option>
-      <option value="yes">Yes</option>
-      <option value="no">No</option>
-    </select>
-    <label for="prevOwnedFilter">PrevOwned:</label>
-    <select id="prevOwnedFilter">
-      <option value="all">All</option>
-      <option value="yes">Yes</option>
-      <option value="no">No</option>
-    </select>
-    {{if .Error}}
-    <p><span class="error">Error: {{.Error}}</span></p>
-    {{else}}
-    <div class="table-responsive">
-      <table id="collectionTable">
-        <thead>
-          <tr>
-            <th id="nameHeader">Name</th>
-            <th id="numPlaysHeader">#Plays</th>
-            <th>Own</th>
-            <th>PrevOwned</th>
-            <th>ForTrade</th>
-            <th>Want</th>
-            <th>WantToPlay</th>
-            <th>WantToBuy</th>
-            <th>Wishlist</th>
-            <th>Preordered</th>
-            <th>Track</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{range .Collection.Items}}
-          <tr>
-            <td>{{.Name}}</td>
-            <td style="text-align: center;">{{.NumPlays}}</td>
-            <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-            {{if eq .Status.Preordered 1}}
-            <td>
-              <a href="/boardgames/backed?name={{.Name}}" class="small-table-btn">Track</a>
-            </td>
+<body class="boardgames-app-page">
+  <div class="page-shell">
+    <header class="shell-header">
+      <div class="container wide-container app-shell-bar">
+        <a href="/" class="app-brand" aria-label="Buddy home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="brand-mark-card brand-mark-card-back"></span>
+            <span class="brand-mark-card brand-mark-card-front"></span>
+            <span class="brand-mark-accent"></span>
+          </span>
+          <span>Buddy</span>
+        </a>
+        <nav class="app-nav" aria-label="Primary navigation">
+          <a href="/" class="app-nav-link">Home</a>
+          <a href="/boardgames" class="app-nav-link" aria-current="page">Board Games</a>
+          <a href="/shopping" class="app-nav-link">Shopping</a>
+        </nav>
+        <div class="app-shell-actions">
+          <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container wide-container page-main boardgames-main">
+      <section class="card page-intro" aria-label="Board games overview">
+        <div class="section-heading">
+          <h1>Board Games</h1>
+          <p>Browse your collection, pick something to play, and track backed titles in the same Buddy shell used by home and shopping.</p>
+        </div>
+        <div class="page-intro-meta">
+          <span class="badge">Collection browser</span>
+          <a href="/boardgames/pick" class="button-link btn-tonal">Pick games</a>
+          <a href="/boardgames/backed" class="button-link btn-tonal">Track backed</a>
+        </div>
+      </section>
+
+      <section class="card-shell boardgames-card">
+        <div class="card-header">
+          <div class="section-heading">
+            <h2>Collection workspace</h2>
+            <p>Search by username, keep the existing client-side filters, and sort the results table below.</p>
+          </div>
+          <span class="badge">Table tools</span>
+        </div>
+
+        <div class="card-body">
+          <div class="section-block">
+            <div class="section-header">
+              <div class="section-heading">
+                <h2>Collection filters</h2>
+                <p>Load a BoardGameGeek user, then narrow the visible rows without changing any backend behavior.</p>
+              </div>
+            </div>
+            <form action="/boardgames" method="GET" class="form-shell">
+              <div class="section-block">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="tthung1997">
+                  </div>
+                  <div class="field">
+                    <label for="ownFilter">Own</label>
+                    <select id="ownFilter">
+                      <option value="all">All</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="prevOwnedFilter">Prev Owned</label>
+                    <select id="prevOwnedFilter">
+                      <option value="all">All</option>
+                      <option value="yes">Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-filled">Search</button>
+                  </div>
+                </div>
+              </div>
+              <div class="section-block">
+                <div class="chip-row boardgames-chip-row" aria-label="Collection filters summary">
+                  <span class="chip active">All games</span>
+                  <label for="excludeExpansion" class="chip">
+                    <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
+                    <span>Exclude expansions</span>
+                  </label>
+                  <span class="chip">Client-side own filter</span>
+                  <span class="chip">Preorder tracking</span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="section-block table-shell">
+            <div class="section-header">
+              <div class="section-heading">
+                <h2>Collection</h2>
+                <p>Sort by Name or # Plays and use Track to open backed game details for preordered items.</p>
+              </div>
+              <span class="chip">Results table</span>
+            </div>
+
+            {{if .Error}}
+            <p><span class="error">Error: {{.Error}}</span></p>
             {{else}}
-            <td></td>
+            <div class="table-responsive">
+              <table id="collectionTable">
+                <thead>
+                  <tr>
+                    <th id="nameHeader" class="sortable">Name</th>
+                    <th id="numPlaysHeader" class="sortable">#Plays</th>
+                    <th>Own</th>
+                    <th>PrevOwned</th>
+                    <th>ForTrade</th>
+                    <th>Want</th>
+                    <th>WantToPlay</th>
+                    <th>WantToBuy</th>
+                    <th>Wishlist</th>
+                    <th>Preordered</th>
+                    <th>Track</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .Collection.Items}}
+                  <tr>
+                    <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
+                    <td class="boardgames-center-cell">{{.NumPlays}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Own 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Want 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}✅{{end}}</td>
+                    {{if eq .Status.Preordered 1}}
+                    <td>
+                      <a href="/boardgames/backed?name={{.Name}}" class="small-table-btn">Track</a>
+                    </td>
+                    {{else}}
+                    <td></td>
+                    {{end}}
+                  </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
             {{end}}
-          </tr>
-          {{end}}
-        </tbody>
-      </table>
-    </div>
-    {{end}}
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
   <script>
-    // Unescape
     function unescapeParentheses(str) {
       return str.replace(/%28/g, "(").replace(/%29/g, ")");
     }
 
-    // Sort
     let sortOrders = { name: true, numPlays: true };
 
     function sortTable(columnIndex, columnKey) {
       let table = document.getElementById('collectionTable');
-      let rows = Array.from(table.rows).slice(1); // exclude the header row
+      let rows = Array.from(table.rows).slice(1);
       rows.sort(function (rowA, rowB) {
         let a = rowA.cells[columnIndex].innerText;
         let b = rowB.cells[columnIndex].innerText;
-        if (columnKey === 'numPlays') { // convert to numbers for correct sorting
+        if (columnKey === 'numPlays') {
           a = Number(a);
           b = Number(b);
           return sortOrders[columnKey] ? a - b : b - a;
@@ -107,26 +191,35 @@
       rows.forEach(function (row) {
         table.tBodies[0].appendChild(row);
       });
-      sortOrders[columnKey] = !sortOrders[columnKey]; // reverse the sort order for the next click
+      sortOrders[columnKey] = !sortOrders[columnKey];
     }
 
-    document.getElementById('nameHeader').addEventListener('click', function () {
-      sortTable(0, 'name'); // assuming "Name" is the first column
-    });
+    let nameHeader = document.getElementById('nameHeader');
+    let numPlaysHeader = document.getElementById('numPlaysHeader');
 
-    document.getElementById('numPlaysHeader').addEventListener('click', function () {
-      sortTable(1, 'numPlays'); // assuming "NumPlays" is the second column
-    });
+    if (nameHeader) {
+      nameHeader.addEventListener('click', function () {
+        sortTable(0, 'name');
+      });
+    }
 
-    // Filter
+    if (numPlaysHeader) {
+      numPlaysHeader.addEventListener('click', function () {
+        sortTable(1, 'numPlays');
+      });
+    }
+
     let filters = [
-      { columnIndex: 2, elementId: 'ownFilter' }, // assuming "Own" is the third column
-      { columnIndex: 3, elementId: 'prevOwnedFilter' } // assuming "PrevOwned" is the fourth column
+      { columnIndex: 2, elementId: 'ownFilter' },
+      { columnIndex: 3, elementId: 'prevOwnedFilter' }
     ];
 
     function applyFilters() {
       let table = document.getElementById('collectionTable');
-      let rows = Array.from(table.rows).slice(1); // exclude the header row
+      if (!table) {
+        return;
+      }
+      let rows = Array.from(table.rows).slice(1);
       rows.forEach(function (row) {
         let showRow = true;
         filters.forEach(function (filter) {
@@ -141,7 +234,10 @@
     }
 
     filters.forEach(function (filter) {
-      document.getElementById(filter.elementId).addEventListener('change', applyFilters);
+      let filterElement = document.getElementById(filter.elementId);
+      if (filterElement) {
+        filterElement.addEventListener('change', applyFilters);
+      }
     });
   </script>
 </body>

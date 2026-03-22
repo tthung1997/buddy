@@ -4,93 +4,181 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
+  <script src="/static/theme.js"></script>
   <link rel="stylesheet" href="/static/style.css">
   <title>Board Games Pick</title>
 </head>
 
-<body>
-  <div class="container wide-container">
-    <h1>Board Games Pick</h1>
-    <a href="/" class="button-link">Home</a>
-    <a href="/boardgames" class="button-link">Board Games</a>
+<body class="boardgames-app-page">
+  <div class="page-shell">
+    <header class="shell-header">
+      <div class="container wide-container app-shell-bar">
+        <a href="/" class="app-brand" aria-label="Buddy home">
+          <span class="brand-mark" aria-hidden="true">
+            <span class="brand-mark-card brand-mark-card-back"></span>
+            <span class="brand-mark-card brand-mark-card-front"></span>
+            <span class="brand-mark-accent"></span>
+          </span>
+          <span>Buddy</span>
+        </a>
+        <nav class="app-nav" aria-label="Primary navigation">
+          <a href="/" class="app-nav-link">Home</a>
+          <a href="/boardgames" class="app-nav-link" aria-current="page">Board Games</a>
+          <a href="/shopping" class="app-nav-link">Shopping</a>
+        </nav>
+        <div class="app-shell-actions">
+          <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+          </button>
+        </div>
+      </div>
+    </header>
 
-    <form action="/boardgames/pick" method="GET">
-      <label for="username">Filter by username:</label>
-      <input type="text" id="username" name="username" placeholder="tthung1997">
-      <label for="count">Count:</label>
-      <input type="number" id="count" name="count" min="1" value="1">
-      <label for="prioritizeLessPlayed">
-        <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
-        Prioritize Less Played Games
-      </label>
-      <label for="excludeExpansion">
-        <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
-        Exclude Expansion
-      </label>
-      <label for="own">Own:</label>
-      <select id="own" name="own">
-        <option value="all">All</option>
-        <option value="yes" selected>Yes</option>
-        <option value="no">No</option>
-      </select>
-      <button type="submit">Submit</button>
-    </form>
+    <main class="container wide-container page-main boardgames-main">
+      <section class="card page-intro" aria-label="Board game picker overview">
+        <div class="section-heading">
+          <h1>Board Game Picker</h1>
+          <p>Use the shared Buddy shell to choose a user, keep the current weighted options, and review the selected games below.</p>
+        </div>
+        <div class="page-intro-meta">
+          <span class="badge">Random picker</span>
+          <a href="/boardgames" class="button-link btn-tonal">Collection</a>
+          <a href="/boardgames/backed" class="button-link btn-tonal">Backed</a>
+        </div>
+      </section>
 
-    {{if .Error}}
-    <p><span class="error">Error: {{.Error}}</span></p>
-    {{else}}
-    <div class="table-responsive">
-      <table id="collectionTable">
-        <thead>
-          <tr>
-            <th>Thumbnail</th>
-            <th>Name</th>
-            <th>#Plays</th>
-            <th>Own</th>
-            <th>PrevOwned</th>
-            <th>ForTrade</th>
-            <th>Want</th>
-            <th>WantToPlay</th>
-            <th>WantToBuy</th>
-            <th>Wishlist</th>
-            <th>Preordered</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{range .Items}}
-          <tr>
-            <td><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
-            <td>{{.Name}}</td>
-            <td style="text-align: center;">{{.NumPlays}}</td>
-            <td style="text-align: center;">{{if eq .Status.Own 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Want 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-            <td style="text-align: center;">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-          </tr>
-          {{end}}
-        </tbody>
-      </table>
-    </div>
-    {{end}}
+      <section class="card-shell boardgames-card">
+        <div class="card-header">
+          <div class="section-heading">
+            <h2>Picker workspace</h2>
+            <p>Keep the existing selection logic intact while matching the shared form, chip row, and table layout used elsewhere in Buddy.</p>
+          </div>
+          <span class="badge">Selection tools</span>
+        </div>
+
+        <div class="card-body">
+          <div class="section-block">
+            <div class="section-header">
+              <div class="section-heading">
+                <h2>Pick settings</h2>
+                <p>Choose the user and result count, then keep the current weighted random behavior exactly as it works today.</p>
+              </div>
+            </div>
+            <form action="/boardgames/pick" method="GET" class="form-shell">
+              <div class="section-block">
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="tthung1997">
+                  </div>
+
+                  <div class="field">
+                    <label for="count">Count</label>
+                    <input type="number" id="count" name="count" min="1" value="1">
+                  </div>
+
+                  <div class="field">
+                    <label for="own">Own</label>
+                    <select id="own" name="own">
+                      <option value="all">All</option>
+                      <option value="yes" selected>Yes</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-filled">Pick board games</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="section-block">
+                <div class="section-heading">
+                  <h2>Selection settings</h2>
+                  <p>These toggles keep the current weighted and expansion filters without changing their behavior.</p>
+                </div>
+                <div class="chip-row boardgames-chip-row" aria-label="Picker settings">
+                  <span class="chip active">Weighted random picker</span>
+                  <label for="prioritizeLessPlayed" class="chip">
+                    <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
+                    <span>Prioritize less played games</span>
+                  </label>
+                  <label for="excludeExpansion" class="chip">
+                    <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
+                    <span>Exclude expansions</span>
+                  </label>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="section-block table-shell">
+            <div class="section-header">
+              <div class="section-heading">
+                <h2>Picked games</h2>
+                <p>Review the selected items with the same columns and thumbnail behavior already used by the picker.</p>
+              </div>
+              <span class="chip">Results table</span>
+            </div>
+
+            {{if .Error}}
+            <p><span class="error">Error: {{.Error}}</span></p>
+            {{else}}
+            <div class="table-responsive">
+              <table id="collectionTable">
+                <thead>
+                  <tr>
+                    <th>Thumbnail</th>
+                    <th>Name</th>
+                    <th>#Plays</th>
+                    <th>Own</th>
+                    <th>PrevOwned</th>
+                    <th>ForTrade</th>
+                    <th>Want</th>
+                    <th>WantToPlay</th>
+                    <th>WantToBuy</th>
+                    <th>Wishlist</th>
+                    <th>Preordered</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range .Items}}
+                  <tr>
+                    <td class="boardgames-thumbnail-cell"><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
+                    <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
+                    <td class="boardgames-center-cell">{{.NumPlays}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Own 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Want 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
+                    <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}✅{{end}}</td>
+                  </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
+            {{end}}
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-</body>
-
-<script>
-  // Unescape
-  function unescapeParentheses(str) {
-    return str.replace(/%28/g, "(").replace(/%29/g, ")");
-  }
-
-  window.onload = function() {
-    var images = document.querySelectorAll("img");
-    for (var i = 0; i < images.length; i++) {
-        images[i].src = unescapeParentheses(images[i].src);
+  <script>
+    function unescapeParentheses(str) {
+      return str.replace(/%28/g, "(").replace(/%29/g, ")");
     }
-  };
-</script>
+
+    window.onload = function() {
+      var images = document.querySelectorAll("img");
+      for (var i = 0; i < images.length; i++) {
+        images[i].src = unescapeParentheses(images[i].src);
+      }
+    };
+  </script>
+</body>
 
 </html>
