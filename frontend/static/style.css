@@ -1755,7 +1755,7 @@ tr[data-status="waiting"] td {
 
   .shell-header .app-shell-bar,
   .boardgames-header .boardgames-topbar {
-    padding: 1rem 0;
+    padding: 1rem;
   }
 
   .feature-grid {
@@ -1804,15 +1804,15 @@ tr[data-status="waiting"] td {
     flex: 1 1 100%;
     justify-content: flex-start;
     min-height: 3rem;
-    padding: 0.75rem 0;
+    padding: 0.75rem;
   }
 
   .app-nav-link[aria-current="page"]::after,
   .page-nav > a[aria-current="page"]::after,
   .shopping-primary-nav a[aria-current="page"]::after,
   .boardgames-nav a.is-active::after {
-    right: 0;
-    left: 0;
+    right: 0.75rem;
+    left: 0.75rem;
   }
 
   .nav-actions > *,
