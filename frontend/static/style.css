@@ -1293,6 +1293,214 @@ td img,
   font-weight: 500;
 }
 
+.boardgames-overview {
+  align-items: stretch;
+  gap: 1.5rem;
+}
+
+.boardgames-overview-copy {
+  flex: 1 1 32rem;
+}
+
+.boardgames-overview-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.boardgames-overview-points a.chip {
+  text-decoration: none;
+}
+
+.boardgames-overview-points a.chip[aria-current="page"] {
+  background: var(--color-primary-container);
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-outline-variant));
+}
+.boardgames-meta-copy {
+  color: var(--color-on-surface-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.boardgames-workspace {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-strong) 96%, transparent) 0%, var(--color-surface) 100%);
+}
+
+.boardgames-workspace-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.boardgames-workspace-frame {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.boardgames-view-grid {
+  display: grid;
+  grid-template-columns: minmax(19rem, 24rem) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.boardgames-panel-card {
+  padding: 1.25rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  gap: 1rem;
+}
+
+.boardgames-action-panel {
+  align-self: start;
+  background: color-mix(in srgb, var(--color-surface-strong) 76%, var(--color-surface-container) 24%);
+}
+
+.boardgames-data-panel {
+  min-width: 0;
+}
+
+.boardgames-panel-card .section-header {
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+}
+
+.boardgames-panel-card .section-header p {
+  max-width: 32rem;
+}
+
+.boardgames-panel-card .form-shell {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.boardgames-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-on-surface-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.boardgames-section-note {
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 82%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container);
+  color: var(--color-on-surface-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.boardgames-feedback-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  grid-column: 1 / -1;
+}
+
+.boardgames-kicker {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.boardgames-intro-meta {
+  display: grid;
+  justify-items: flex-start;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+
+.boardgames-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.boardgames-intro-note,
+.boardgames-helper-text,
+.boardgames-toolbar-label {
+  margin: 0;
+  color: var(--color-on-surface-muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.boardgames-toggle-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.boardgames-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-strong);
+  color: var(--color-on-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.boardgames-inline-toggle:hover {
+  border-color: var(--color-border-strong);
+}
+
+.boardgames-inline-toggle span {
+  color: var(--color-on-surface);
+}
+
+.boardgames-results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-container);
+}
+
+#filter-form.boardgames-filter-toolbar {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.boardgames-status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 #filter-form {
   align-items: center;
 }
@@ -1612,6 +1820,10 @@ tr[data-status="waiting"] td {
   .boardgames-card-actions > *,
   .section-actions > * {
     flex: 1 1 100%;
+  }
+
+  .boardgames-view-grid {
+    grid-template-columns: 1fr;
   }
 
   .theme-toggle-btn,

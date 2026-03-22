@@ -12,6 +12,254 @@
         padding: 0;
         background: var(--color-surface-container);
       }
+
+      .shopping-overview {
+        align-items: stretch;
+        gap: 1.5rem;
+      }
+
+      .shopping-overview-copy {
+        flex: 1 1 32rem;
+      }
+
+      .shopping-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--color-primary);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .shopping-overview-copy p {
+        max-width: 46rem;
+      }
+
+      .shopping-overview-points {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+
+      .shopping-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
+        flex: 1 1 24rem;
+      }
+
+      .shopping-stat-card {
+        display: grid;
+        gap: 0.4rem;
+        align-content: start;
+        min-height: 100%;
+        padding: 1rem;
+        border: 1px solid var(--color-outline-variant);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+      }
+
+      .shopping-stat-label {
+        color: var(--color-on-surface-muted);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .shopping-stat-card strong {
+        font-size: clamp(1.75rem, 4vw, 2.25rem);
+        line-height: 1;
+        font-weight: 600;
+        color: var(--color-on-surface);
+      }
+
+      .shopping-stat-help {
+        color: var(--color-on-surface-muted);
+        font-size: 0.88rem;
+      }
+
+      .shopping-stat-card-muted {
+        background: var(--color-surface-container);
+      }
+
+      .shopping-stat-card-muted strong {
+        font-size: 1.05rem;
+        line-height: 1.3;
+      }
+
+      .shopping-workspace {
+        background: linear-gradient(180deg, color-mix(in srgb, var(--color-surface-strong) 96%, transparent) 0%, var(--color-surface) 100%);
+      }
+
+      .shopping-workspace-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
+      }
+
+      .shopping-meta-copy {
+        color: var(--color-on-surface-muted);
+        font-size: 0.88rem;
+      }
+
+      .shopping-workspace-frame {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      .shopping-tabs-shell {
+        display: grid;
+        gap: 0.75rem;
+        padding: 1rem;
+        border: 1px solid var(--color-outline-variant);
+        border-radius: var(--radius-md);
+        background: var(--color-surface-container);
+      }
+
+      .shopping-tabs {
+        margin: 0;
+        border-bottom: 0;
+        gap: 0.75rem;
+      }
+
+      .shopping-tabs .tab-btn {
+        flex: 1 1 14rem;
+        min-height: 4.5rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid var(--color-outline-variant);
+        border-bottom-width: 1px;
+        border-radius: var(--radius-md);
+        background: var(--color-surface-strong);
+        color: var(--color-on-surface);
+        box-shadow: none;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+      }
+
+      .shopping-tabs .tab-btn:hover {
+        border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-outline-variant));
+        background: color-mix(in srgb, var(--color-primary-container) 30%, var(--color-surface-strong));
+      }
+
+      .shopping-tabs .tab-btn.active {
+        border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-outline-variant));
+        background: var(--color-primary-container);
+        color: var(--color-primary);
+      }
+
+      .shopping-tab-label {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .shopping-tab-hint {
+        display: block;
+        color: var(--color-on-surface-muted);
+        font-size: 0.8rem;
+        line-height: 1.3;
+      }
+
+      .shopping-tabs .tab-btn.active .shopping-tab-hint {
+        color: var(--color-on-primary-container);
+      }
+
+      .shopping-workspace-note {
+        margin: 0;
+        color: var(--color-on-surface-muted);
+        font-size: 0.9rem;
+      }
+
+      .shopping-view-grid {
+        display: grid;
+        grid-template-columns: minmax(19rem, 24rem) minmax(0, 1fr);
+        gap: 1.25rem;
+      }
+
+      .shopping-panel-card {
+        padding: 1.25rem;
+        border: 1px solid var(--color-outline-variant);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+        box-shadow: var(--shadow-sm);
+        gap: 1rem;
+      }
+
+      .shopping-action-panel {
+        align-self: start;
+        background: color-mix(in srgb, var(--color-surface-strong) 76%, var(--color-surface-container) 24%);
+      }
+
+      .shopping-data-panel {
+        min-width: 0;
+      }
+
+      .shopping-panel-card .shopping-section-header {
+        padding-bottom: 0.9rem;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 80%, transparent);
+      }
+
+      .shopping-panel-card .shopping-section-header p {
+        max-width: 32rem;
+      }
+
+      .shopping-panel-card .shopping-form {
+        padding: 0;
+        border: 0;
+        background: transparent;
+      }
+
+      .shopping-section-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--color-on-surface-muted);
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .shopping-section-note {
+        padding: 0.85rem 1rem;
+        border: 1px solid color-mix(in srgb, var(--color-outline-variant) 82%, transparent);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface-container);
+        color: var(--color-on-surface-muted);
+        font-size: 0.88rem;
+      }
+
+      .shopping-count-badge {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .shopping-table-shell .table-responsive {
+        background: var(--color-surface-strong);
+      }
+
+      @media (max-width: 960px) {
+        .shopping-summary-grid,
+        .shopping-view-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .shopping-tabs .tab-btn {
+          flex-basis: 100%;
+        }
+
+        .shopping-workspace-meta {
+          justify-content: flex-start;
+        }
+      }
     </style>
   </head>
   <body class="shopping-app-page">
@@ -42,135 +290,178 @@
 
       <main class="container wide-container page-main">
         <section class="card page-intro shopping-overview" aria-label="Shopping overview">
-          <div class="section-heading">
-            <h1>Shopping</h1>
-            <p>Manage pantry inventory and keep your shopping list ready for the next store run with the same shared Buddy shell, cards, and spacing.</p>
+          <div class="section-heading shopping-overview-copy">
+            <span class="shopping-kicker">Household workspace</span>
+            <h1>Shopping workspace</h1>
+            <p>Track what is already at home, queue the next store run, and keep everyday shopping tasks organized in a layout that can grow with future planning views.</p>
+            <div class="shopping-overview-points" aria-label="Shopping workflow highlights">
+              <span class="chip active">Inventory visibility</span>
+              <span class="chip">Restock queue</span>
+              <span class="chip">Store context</span>
+            </div>
           </div>
-          <div class="page-intro-meta shopping-summary">
-            <span class="badge"><strong id="inventory-stat">0</strong> Inventory items</span>
-            <span class="badge"><strong id="shopping-stat">0</strong> Shopping list items</span>
+          <div class="shopping-summary-grid" aria-label="Shopping totals">
+            <div class="shopping-stat-card">
+              <span class="shopping-stat-label">Inventory on hand</span>
+              <strong id="inventory-stat">0</strong>
+              <span class="shopping-stat-help">Items currently tracked in storage.</span>
+            </div>
+            <div class="shopping-stat-card">
+              <span class="shopping-stat-label">Next trip queue</span>
+              <strong id="shopping-stat">0</strong>
+              <span class="shopping-stat-help">Items waiting on the shopping list.</span>
+            </div>
+            <div class="shopping-stat-card shopping-stat-card-muted">
+              <span class="shopping-stat-label">Workflow</span>
+              <strong>Inventory → List → Purchased</strong>
+              <span class="shopping-stat-help">Use separate spaces for adding items and managing the tables below.</span>
+            </div>
           </div>
         </section>
 
         <section class="card-shell shopping-workspace">
           <div class="card-header">
             <div class="section-heading">
+              <span class="shopping-kicker">Task flow</span>
               <h2>Shopping tracker</h2>
-              <p>Switch between inventory and shopping list views without changing any of the existing flows.</p>
+              <p>Switch between current stock and upcoming purchases with clearer work areas for overview, entry, and item management.</p>
+            </div>
+            <div class="shopping-workspace-meta">
+              <span class="badge">Two-step workspace</span>
+              <span class="shopping-meta-copy">Forms stay separate from action tables.</span>
             </div>
           </div>
 
           <div class="card-body">
-            <div class="tabs shopping-tabs" role="tablist" aria-label="Shopping sections">
-              <button class="tab-btn active" id="tab-inventory-btn" type="button" role="tab" aria-selected="true" aria-controls="tab-inventory" onclick="showTab('inventory')">Inventory</button>
-              <button class="tab-btn" id="tab-shopping-btn" type="button" role="tab" aria-selected="false" aria-controls="tab-shopping" onclick="showTab('shopping')">Shopping List</button>
-            </div>
-
-            <div id="tab-inventory" class="tab-content" role="tabpanel" aria-labelledby="tab-inventory-btn" style="display:block;">
-              <div class="shopping-panel-stack">
-                <section class="section-block shopping-section">
-                  <div class="section-header shopping-section-header">
-                    <div class="section-heading">
-                      <h2>Add inventory item</h2>
-                      <p>Capture what you already bought so your stock stays current.</p>
-                    </div>
-                    <span class="badge" id="inventory-count">0 items</span>
-                  </div>
-                  <form id="add-inventory-form" class="shopping-form">
-                    <div class="shopping-form-field">
-                      <label for="add-item-name">Item name</label>
-                      <input type="text" id="add-item-name" placeholder="Milk" required>
-                    </div>
-                    <div class="shopping-form-field">
-                      <label for="add-item-date">Purchased date</label>
-                      <input type="date" id="add-item-date" class="styled-date" required>
-                    </div>
-                    <div class="shopping-form-field">
-                      <label for="add-item-store">Store</label>
-                      <input type="text" id="add-item-store" placeholder="Neighborhood market" required>
-                    </div>
-                    <div class="shopping-form-actions">
-                      <button type="submit">Add to Inventory</button>
-                    </div>
-                  </form>
-                </section>
-
-                <section class="section-block shopping-section shopping-table-shell table-shell">
-                  <div class="section-header shopping-section-header">
-                    <div class="section-heading">
-                      <h2>Inventory</h2>
-                      <p>Remove items when they run out, and optionally add them back to the shopping list.</p>
-                    </div>
-                  </div>
-                  <div class="table-responsive">
-                    <table id="inventory-table">
-                      <thead>
-                        <tr>
-                          <th>Item</th>
-                          <th>Purchased Date</th>
-                          <th>Store</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Inventory items will be rendered here -->
-                      </tbody>
-                    </table>
-                    <div class="shopping-table-empty" id="inventory-empty" hidden>No inventory items yet. Add your first purchase above.</div>
-                  </div>
-                </section>
+            <div class="shopping-workspace-frame">
+              <div class="shopping-tabs-shell">
+                <div class="tabs shopping-tabs" role="tablist" aria-label="Shopping sections">
+                  <button class="tab-btn active" id="tab-inventory-btn" type="button" role="tab" aria-selected="true" aria-controls="tab-inventory" onclick="showTab('inventory')">
+                    <span class="shopping-tab-label">Inventory</span>
+                    <span class="shopping-tab-hint">Track what is already stocked at home</span>
+                  </button>
+                  <button class="tab-btn" id="tab-shopping-btn" type="button" role="tab" aria-selected="false" aria-controls="tab-shopping" onclick="showTab('shopping')">
+                    <span class="shopping-tab-label">Shopping List</span>
+                    <span class="shopping-tab-hint">Plan the next trip and move purchases back into inventory</span>
+                  </button>
+                </div>
+                <p class="shopping-workspace-note">Choose a workspace, add an item in the action panel, then manage the related table beside it.</p>
               </div>
-            </div>
 
-            <div id="tab-shopping" class="tab-content" role="tabpanel" aria-labelledby="tab-shopping-btn" style="display:none;" hidden>
-              <div class="shopping-panel-stack">
-                <section class="section-block shopping-section">
-                  <div class="section-header shopping-section-header">
-                    <div class="section-heading">
-                      <h2>Add shopping item</h2>
-                      <p>Keep upcoming purchases organized by item and preferred store.</p>
+              <div id="tab-inventory" class="tab-content" role="tabpanel" aria-labelledby="tab-inventory-btn" style="display:block;">
+                <div class="shopping-view-grid">
+                  <section class="section-block shopping-section shopping-panel-card shopping-action-panel">
+                    <div class="section-header shopping-section-header">
+                      <div class="section-heading">
+                        <span class="shopping-section-label">Action</span>
+                        <h2>Add inventory item</h2>
+                        <p>Capture items you already bought so the inventory stays current before you manage the table.</p>
+                      </div>
+                      <span class="chip active">Quick add</span>
                     </div>
-                    <span class="badge" id="shopping-count">0 items</span>
-                  </div>
-                  <form id="add-shopping-form" class="shopping-form">
-                    <div class="shopping-form-field">
-                      <label for="add-shopping-name">Item name</label>
-                      <input type="text" id="add-shopping-name" placeholder="Bread" required>
-                    </div>
-                    <div class="shopping-form-field">
-                      <label for="add-shopping-store">Store</label>
-                      <input type="text" id="add-shopping-store" placeholder="Optional store">
-                    </div>
-                    <div class="shopping-form-actions">
-                      <button type="submit">Add to Shopping List</button>
-                    </div>
-                  </form>
-                </section>
+                    <form id="add-inventory-form" class="shopping-form">
+                      <div class="shopping-form-field">
+                        <label for="add-item-name">Item name</label>
+                        <input type="text" id="add-item-name" placeholder="Milk" required>
+                      </div>
+                      <div class="shopping-form-field">
+                        <label for="add-item-date">Purchased date</label>
+                        <input type="date" id="add-item-date" class="styled-date" required>
+                      </div>
+                      <div class="shopping-form-field">
+                        <label for="add-item-store">Store</label>
+                        <input type="text" id="add-item-store" placeholder="Neighborhood market" required>
+                      </div>
+                      <div class="shopping-form-actions">
+                        <button type="submit">Add to Inventory</button>
+                      </div>
+                    </form>
+                    <div class="shopping-section-note">Use this panel for newly purchased items. Remove depleted items from the table to optionally send them back to the shopping list.</div>
+                  </section>
 
-                <section class="section-block shopping-section shopping-table-shell table-shell">
-                  <div class="section-header shopping-section-header">
-                    <div class="section-heading">
-                      <h2>Shopping List</h2>
-                      <p>Mark items purchased to move them into inventory, or remove them when you no longer need them.</p>
+                  <section class="section-block shopping-section shopping-panel-card shopping-data-panel shopping-table-shell table-shell">
+                    <div class="section-header shopping-section-header">
+                      <div class="section-heading">
+                        <span class="shopping-section-label">Current stock</span>
+                        <h2>Inventory</h2>
+                        <p>Review what is on hand, when it was purchased, and where it came from.</p>
+                      </div>
+                      <span class="badge shopping-count-badge" id="inventory-count">0 items</span>
                     </div>
-                  </div>
-                  <div class="table-responsive">
-                    <table id="shopping-table">
-                      <thead>
-                        <tr>
-                          <th>Purchased?</th>
-                          <th>Item</th>
-                          <th>Store</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Shopping list items will be rendered here -->
-                      </tbody>
-                    </table>
-                    <div class="shopping-table-empty" id="shopping-empty" hidden>No shopping items yet. Add a restock item above.</div>
-                  </div>
-                </section>
+                    <div class="table-responsive">
+                      <table id="inventory-table">
+                        <thead>
+                          <tr>
+                            <th>Item</th>
+                            <th>Purchased Date</th>
+                            <th>Store</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <!-- Inventory items will be rendered here -->
+                        </tbody>
+                      </table>
+                      <div class="shopping-table-empty" id="inventory-empty" hidden>No inventory items yet. Start in the action panel with the first purchase you want to keep visible here.</div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+
+              <div id="tab-shopping" class="tab-content" role="tabpanel" aria-labelledby="tab-shopping-btn" style="display:none;" hidden>
+                <div class="shopping-view-grid">
+                  <section class="section-block shopping-section shopping-panel-card shopping-action-panel">
+                    <div class="section-header shopping-section-header">
+                      <div class="section-heading">
+                        <span class="shopping-section-label">Action</span>
+                        <h2>Add shopping item</h2>
+                        <p>Queue upcoming purchases so the next trip stays focused by item and preferred store.</p>
+                      </div>
+                      <span class="chip active">Restock</span>
+                    </div>
+                    <form id="add-shopping-form" class="shopping-form">
+                      <div class="shopping-form-field">
+                        <label for="add-shopping-name">Item name</label>
+                        <input type="text" id="add-shopping-name" placeholder="Bread" required>
+                      </div>
+                      <div class="shopping-form-field">
+                        <label for="add-shopping-store">Store</label>
+                        <input type="text" id="add-shopping-store" placeholder="Optional store">
+                      </div>
+                      <div class="shopping-form-actions">
+                        <button type="submit">Add to Shopping List</button>
+                      </div>
+                    </form>
+                    <div class="shopping-section-note">Use this panel for restocks and planned purchases. Mark an item purchased from the table to move it back into inventory.</div>
+                  </section>
+
+                  <section class="section-block shopping-section shopping-panel-card shopping-data-panel shopping-table-shell table-shell">
+                    <div class="section-header shopping-section-header">
+                      <div class="section-heading">
+                        <span class="shopping-section-label">Upcoming purchases</span>
+                        <h2>Shopping List</h2>
+                        <p>Keep store plans visible, mark purchased items as they come in, and remove items you no longer need.</p>
+                      </div>
+                      <span class="badge shopping-count-badge" id="shopping-count">0 items</span>
+                    </div>
+                    <div class="table-responsive">
+                      <table id="shopping-table">
+                        <thead>
+                          <tr>
+                            <th>Purchased?</th>
+                            <th>Item</th>
+                            <th>Store</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <!-- Shopping list items will be rendered here -->
+                        </tbody>
+                      </table>
+                      <div class="shopping-table-empty" id="shopping-empty" hidden>No shopping items yet. Start in the action panel with the next restock or planned purchase.</div>
+                    </div>
+                  </section>
+                </div>
               </div>
             </div>
           </div>

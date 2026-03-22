@@ -28,49 +28,60 @@
         </nav>
         <div class="app-shell-actions">
           <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
-            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
-            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">&#9728;</span>
+            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">&#9790;</span>
           </button>
         </div>
       </div>
     </header>
 
     <main class="container wide-container page-main boardgames-main">
-      <section class="card page-intro" aria-label="Backed board games overview">
-        <div class="section-heading">
+      <section class="card page-intro boardgames-overview" aria-label="Backed board games overview">
+        <div class="section-heading boardgames-overview-copy">
+          <span class="boardgames-kicker">Incoming games</span>
           <h1>{{if .AddName}}Edit backed game{{else}}Backed board games{{end}}</h1>
-          <p>Keep delivery details and pledge information up to date with the same shared Buddy shell and workspace patterns used across the app.</p>
-        </div>
-        <div class="page-intro-meta">
-          <span class="badge">Backed tracker</span>
-          <a href="/boardgames" class="button-link btn-tonal">Collection</a>
-          <a href="/boardgames/pick" class="button-link btn-tonal">Pick games</a>
-          {{if .Success}}<span class="success">{{.Success}}</span>{{end}}
-          {{if .Error}}<span class="error">Error: {{.Error}}</span>{{end}}
+          <p>Track expected deliveries, pledge details, and received status in one place without affecting the separate collection and picker tools.</p>
+          <div class="boardgames-overview-points" aria-label="Backed workflow highlights">
+            <a href="/boardgames" class="chip">Collection browser</a>
+            <a href="/boardgames/pick" class="chip">Quick pick</a>
+            <a href="/boardgames/backed" class="chip" aria-current="page">Backed tracking</a>
+          </div>
+          {{if or .Success .Error}}
+          <div class="boardgames-feedback-row">
+            {{if .Success}}<span class="success">{{.Success}}</span>{{end}}
+            {{if .Error}}<span class="error">Error: {{.Error}}</span>{{end}}
+          </div>
+          {{end}}
         </div>
       </section>
 
-      <section class="card-shell boardgames-card">
+      <section class="card-shell boardgames-card boardgames-workspace">
         <div class="card-header">
           <div class="section-heading">
-            <h2>Backed games workspace</h2>
-            <p>Use the shared form, chip row, and table shells while keeping all of the existing Go template logic and JavaScript actions intact.</p>
+            <span class="boardgames-kicker">Workspace</span>
+            <h2>Tracker tools</h2>
+            <p>Keep entry on the left and delivery management on the right so the tracker feels like the shopping workspace.</p>
           </div>
-          <span class="badge">{{if .AddName}}Edit mode{{else}}Add mode{{end}}</span>
+          <div class="boardgames-workspace-meta">
+            <span class="badge">{{if .AddName}}Edit mode{{else}}Add mode{{end}}</span>
+            <span class="boardgames-meta-copy">Form and tracker stay separated into clear work areas.</span>
+          </div>
         </div>
 
         <div class="card-body">
-          <div class="section-block">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>{{if .AddName}}Edit backed game{{else}}Add backed game{{end}}</h2>
-                <p>Capture delivery dates, pledge details, and source information without changing the existing add and edit flows.</p>
-              </div>
-            </div>
-            <form class="form-shell" method="POST" action="{{if .AddName}}/boardgames/backed/edit{{else}}/boardgames/backed/add{{end}}">
-              <input type="hidden" name="idx" value="{{if .AddName}}{{range $i, $game := .Items}}{{if eq $game.Name $.AddName}}{{$i}}{{end}}{{end}}{{end}}">
-              <div class="section-block">
-                <div class="form-grid">
+          <div class="boardgames-workspace-frame">
+            <div class="boardgames-view-grid">
+              <section class="section-block boardgames-panel-card boardgames-action-panel">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Action</span>
+                    <h2>{{if .AddName}}Edit details{{else}}Add a backed game{{end}}</h2>
+                    <p>Capture delivery timing, price, store, and pledge manager details without changing the existing add and edit flow.</p>
+                  </div>
+                  <span class="chip active">{{if .AddName}}Edit mode{{else}}Add mode{{end}}</span>
+                </div>
+                <form class="form-shell" method="POST" action="{{if .AddName}}/boardgames/backed/edit{{else}}/boardgames/backed/add{{end}}">
+                  <input type="hidden" name="idx" value="{{if .AddName}}{{range $i, $game := .Items}}{{if eq $game.Name $.AddName}}{{$i}}{{end}}{{end}}{{end}}">
                   <div class="field">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" required value="{{.AddName}}" class="form-input">
@@ -99,70 +110,71 @@
                       value="{{if .AddName}}{{range .Items}}{{if eq .Name $.AddName}}{{.Platform}}{{end}}{{end}}{{end}}"
                       class="form-input">
                   </div>
-                </div>
-              </div>
-              <div class="section-block">
-                <div class="chip-row boardgames-chip-row" aria-label="Mode summary">
-                  <span class="chip active">{{if .AddName}}Edit mode{{else}}Add mode{{end}}</span>
-                  <span class="chip">Delivery tracking</span>
-                  <span class="chip">Pledge details</span>
-                </div>
-                <div class="form-actions">
-                  <button type="submit">{{if .AddName}}Save Changes{{else}}Add Boardgame{{end}}</button>
-                </div>
-              </div>
-            </form>
-          </div>
+                  <div class="boardgames-chip-row" aria-label="Mode summary">
+                    <span class="chip active">{{if .AddName}}Edit mode{{else}}Add mode{{end}}</span>
+                    <span class="chip">Delivery tracking</span>
+                    <span class="chip">Pledge details</span>
+                  </div>
+                  <div class="form-actions">
+                    <button type="submit" class="btn btn-filled">{{if .AddName}}Save Changes{{else}}Add Boardgame{{end}}</button>
+                  </div>
+                </form>
+                <div class="boardgames-section-note">Use this panel to add a new backed title or update an existing one before returning to the tracker.</div>
+              </section>
 
-          <div class="section-block table-shell">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>Backed / preordered games</h2>
-                <p>Filter by status, sort the key columns, and keep the existing received toggle and edit actions intact.</p>
-              </div>
-              <div class="chip-row" aria-label="Status legend">
-                <span class="status status-received">Received</span>
-                <span class="status status-late">Late</span>
-                <span class="status status-waiting">Waiting</span>
-              </div>
-            </div>
+              <section class="section-block boardgames-panel-card boardgames-data-panel table-shell">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Tracker</span>
+                    <h2>Backed / preordered games</h2>
+                    <p>Filter by status, sort the key columns, and update received state from the same table.</p>
+                  </div>
+                  <div class="boardgames-status-legend" aria-label="Status legend">
+                    <span class="status status-received">Received</span>
+                    <span class="status status-late">Late</span>
+                    <span class="status status-waiting">Waiting</span>
+                  </div>
+                </div>
 
-            <form id="filter-form" class="chip-row" aria-label="Backed status filters">
-              <span class="chip active">Status filters</span>
-              <label><input type="checkbox" class="filter-checkbox" value="received" checked> Received</label>
-              <label><input type="checkbox" class="filter-checkbox" value="late" checked> Late</label>
-              <label><input type="checkbox" class="filter-checkbox" value="waiting" checked> Waiting</label>
-            </form>
+                <form id="filter-form" class="chip-row boardgames-filter-toolbar" aria-label="Backed status filters">
+                  <span class="chip active">Status filters</span>
+                  <label><input type="checkbox" class="filter-checkbox" value="received" checked> Received</label>
+                  <label><input type="checkbox" class="filter-checkbox" value="late" checked> Late</label>
+                  <label><input type="checkbox" class="filter-checkbox" value="waiting" checked> Waiting</label>
+                </form>
+                <div class="boardgames-section-note">Mark a title received inline or open Edit when pledge details need to change.</div>
 
-            <div class="table-responsive">
-              <table id="collectionTable">
-                <thead>
-                  <tr>
-                    <th id="backedNameHeader" class="sortable">Name</th>
-                    <th id="deliveryHeader" class="sortable">Expected Delivery</th>
-                    <th id="priceHeader" class="sortable boardgames-center-cell">Price Paid</th>
-                    <th>Backed/Preordered From</th>
-                    <th>Pledge Manager Platform</th>
-                    <th class="boardgames-center-cell">Received</th>
-                    <th class="boardgames-center-cell">Edit</th>
-                  </tr>
-                </thead>
-                <tbody id="backed-tbody">
-                  {{range $i, $game := .Items}}
-                  <tr class="{{$game.RowClass}}" data-status="{{if $game.Received}}received{{else if eq $game.RowClass "tr-late"}}late{{else}}waiting{{end}}">
-                    <td>{{$game.Name}}</td>
-                    <td>{{$game.Delivery}}</td>
-                    <td class="boardgames-center-cell">${{printf "%.2f" $game.PricePaid}}</td>
-                    <td>{{$game.From}}</td>
-                    <td>{{$game.Platform}}</td>
-                    <td class="boardgames-center-cell">
-                      <input type="checkbox" class="received-checkbox" data-idx="{{$i}}" {{if $game.Received}}checked{{end}}>
-                    </td>
-                    <td class="boardgames-center-cell"><a href="/boardgames/backed/edit?idx={{$i}}" class="small-table-btn">Edit</a></td>
-                  </tr>
-                  {{end}}
-                </tbody>
-              </table>
+                <div class="table-responsive">
+                  <table id="collectionTable">
+                    <thead>
+                      <tr>
+                        <th id="backedNameHeader" class="sortable">Name</th>
+                        <th id="deliveryHeader" class="sortable">Expected Delivery</th>
+                        <th id="priceHeader" class="sortable boardgames-center-cell">Price Paid</th>
+                        <th>Backed/Preordered From</th>
+                        <th>Pledge Manager Platform</th>
+                        <th class="boardgames-center-cell">Received</th>
+                        <th class="boardgames-center-cell">Edit</th>
+                      </tr>
+                    </thead>
+                    <tbody id="backed-tbody">
+                      {{range $i, $game := .Items}}
+                      <tr class="{{$game.RowClass}}" data-status="{{if $game.Received}}received{{else if eq $game.RowClass "tr-late"}}late{{else}}waiting{{end}}">
+                        <td>{{$game.Name}}</td>
+                        <td>{{$game.Delivery}}</td>
+                        <td class="boardgames-center-cell">${{printf "%.2f" $game.PricePaid}}</td>
+                        <td>{{$game.From}}</td>
+                        <td>{{$game.Platform}}</td>
+                        <td class="boardgames-center-cell">
+                          <input type="checkbox" class="received-checkbox" data-idx="{{$i}}" {{if $game.Received}}checked{{end}}>
+                        </td>
+                        <td class="boardgames-center-cell"><a href="/boardgames/backed/edit?idx={{$i}}" class="small-table-btn">Edit</a></td>
+                      </tr>
+                      {{end}}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
             </div>
           </div>
         </div>

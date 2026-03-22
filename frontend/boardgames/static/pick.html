@@ -28,46 +28,53 @@
         </nav>
         <div class="app-shell-actions">
           <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
-            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
-            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">&#9728;</span>
+            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">&#9790;</span>
           </button>
         </div>
       </div>
     </header>
 
     <main class="container wide-container page-main boardgames-main">
-      <section class="card page-intro" aria-label="Board game picker overview">
-        <div class="section-heading">
-          <h1>Board Game Picker</h1>
-          <p>Use the shared Buddy shell to choose a user, keep the current weighted options, and review the selected games below.</p>
-        </div>
-        <div class="page-intro-meta">
-          <span class="badge">Random picker</span>
-          <a href="/boardgames" class="button-link btn-tonal">Collection</a>
-          <a href="/boardgames/backed" class="button-link btn-tonal">Backed</a>
+      <section class="card page-intro boardgames-overview" aria-label="Board game picker overview">
+        <div class="section-heading boardgames-overview-copy">
+          <span class="boardgames-kicker">Decision helper</span>
+          <h1>Board game picker</h1>
+          <p>Pick a few candidates fast while keeping the current weighting rules and collection filters exactly as they already work.</p>
+          <div class="boardgames-overview-points" aria-label="Picker workflow highlights">
+            <a href="/boardgames" class="chip">Collection browser</a>
+            <a href="/boardgames/pick" class="chip" aria-current="page">Quick pick</a>
+            <a href="/boardgames/backed" class="chip">Backed tracking</a>
+          </div>
         </div>
       </section>
 
-      <section class="card-shell boardgames-card">
+      <section class="card-shell boardgames-card boardgames-workspace">
         <div class="card-header">
           <div class="section-heading">
-            <h2>Picker workspace</h2>
-            <p>Keep the existing selection logic intact while matching the shared form, chip row, and table layout used elsewhere in Buddy.</p>
+            <span class="boardgames-kicker">Workspace</span>
+            <h2>Picker tools</h2>
+            <p>Set the rules on the left, then review the shortlist on the right without changing any picker logic.</p>
           </div>
-          <span class="badge">Selection tools</span>
+          <div class="boardgames-workspace-meta">
+            <span class="badge">Two-panel workspace</span>
+            <span class="boardgames-meta-copy">Selection settings stay separate from the results table.</span>
+          </div>
         </div>
 
         <div class="card-body">
-          <div class="section-block">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>Pick settings</h2>
-                <p>Choose the user and result count, then keep the current weighted random behavior exactly as it works today.</p>
-              </div>
-            </div>
-            <form action="/boardgames/pick" method="GET" class="form-shell">
-              <div class="section-block">
-                <div class="form-grid">
+          <div class="boardgames-workspace-frame">
+            <div class="boardgames-view-grid">
+              <section class="section-block boardgames-panel-card boardgames-action-panel">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Action</span>
+                    <h2>Pick settings</h2>
+                    <p>Start with the collection owner and count, then decide how the picker should treat plays and expansions.</p>
+                  </div>
+                  <span class="chip active">Fast chooser</span>
+                </div>
+                <form action="/boardgames/pick" method="GET" class="form-shell">
                   <div class="field">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" placeholder="tthung1997">
@@ -87,81 +94,77 @@
                     </select>
                   </div>
 
+                  <div class="boardgames-chip-row" aria-label="Picker settings">
+                    <label for="prioritizeLessPlayed" class="boardgames-inline-toggle">
+                      <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
+                      <span>Prioritize less played games</span>
+                    </label>
+                    <label for="excludeExpansion" class="boardgames-inline-toggle">
+                      <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
+                      <span>Exclude expansions</span>
+                    </label>
+                  </div>
+
                   <div class="form-actions">
                     <button type="submit" class="btn btn-filled">Pick board games</button>
                   </div>
-                </div>
-              </div>
+                </form>
+                <div class="boardgames-section-note">Use this panel when you want a quick shortlist. The weighted random behavior and thumbnail handling remain unchanged.</div>
+              </section>
 
-              <div class="section-block">
-                <div class="section-heading">
-                  <h2>Selection settings</h2>
-                  <p>These toggles keep the current weighted and expansion filters without changing their behavior.</p>
+              <section class="section-block boardgames-panel-card boardgames-data-panel table-shell">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Shortlist</span>
+                    <h2>Picked games</h2>
+                    <p>Review the shortlist with the same collection data and thumbnails the picker already returned before.</p>
+                  </div>
+                  <span class="badge">Results table</span>
                 </div>
-                <div class="chip-row boardgames-chip-row" aria-label="Picker settings">
-                  <span class="chip active">Weighted random picker</span>
-                  <label for="prioritizeLessPlayed" class="chip">
-                    <input type="checkbox" id="prioritizeLessPlayed" name="prioritizeLessPlayed" checked>
-                    <span>Prioritize less played games</span>
-                  </label>
-                  <label for="excludeExpansion" class="chip">
-                    <input type="checkbox" id="excludeExpansion" name="excludeExpansion" checked>
-                    <span>Exclude expansions</span>
-                  </label>
-                </div>
-              </div>
-            </form>
-          </div>
+                <div class="boardgames-section-note">Great for a quick “what should we play?” pass without losing ownership and collection context.</div>
 
-          <div class="section-block table-shell">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>Picked games</h2>
-                <p>Review the selected items with the same columns and thumbnail behavior already used by the picker.</p>
-              </div>
-              <span class="chip">Results table</span>
+                {{if .Error}}
+                <p><span class="error">Error: {{.Error}}</span></p>
+                {{else}}
+                <div class="table-responsive">
+                  <table id="collectionTable">
+                    <thead>
+                      <tr>
+                        <th>Thumbnail</th>
+                        <th>Name</th>
+                        <th>#Plays</th>
+                        <th>Own</th>
+                        <th>PrevOwned</th>
+                        <th>ForTrade</th>
+                        <th>Want</th>
+                        <th>WantToPlay</th>
+                        <th>WantToBuy</th>
+                        <th>Wishlist</th>
+                        <th>Preordered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{range .Items}}
+                      <tr>
+                        <td class="boardgames-thumbnail-cell"><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
+                        <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
+                        <td class="boardgames-center-cell">{{.NumPlays}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Own 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Want 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}&#10003;{{end}}</td>
+                      </tr>
+                      {{end}}
+                    </tbody>
+                  </table>
+                </div>
+                {{end}}
+              </section>
             </div>
-
-            {{if .Error}}
-            <p><span class="error">Error: {{.Error}}</span></p>
-            {{else}}
-            <div class="table-responsive">
-              <table id="collectionTable">
-                <thead>
-                  <tr>
-                    <th>Thumbnail</th>
-                    <th>Name</th>
-                    <th>#Plays</th>
-                    <th>Own</th>
-                    <th>PrevOwned</th>
-                    <th>ForTrade</th>
-                    <th>Want</th>
-                    <th>WantToPlay</th>
-                    <th>WantToBuy</th>
-                    <th>Wishlist</th>
-                    <th>Preordered</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{range .Items}}
-                  <tr>
-                    <td class="boardgames-thumbnail-cell"><img src="{{.Thumbnail}}" alt="{{.Name}}"></td>
-                    <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
-                    <td class="boardgames-center-cell">{{.NumPlays}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Own 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Want 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-                  </tr>
-                  {{end}}
-                </tbody>
-              </table>
-            </div>
-            {{end}}
           </div>
         </div>
       </section>

@@ -28,46 +28,53 @@
         </nav>
         <div class="app-shell-actions">
           <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
-            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
-            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">&#9728;</span>
+            <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">&#9790;</span>
           </button>
         </div>
       </div>
     </header>
 
     <main class="container wide-container page-main boardgames-main">
-      <section class="card page-intro" aria-label="Board games overview">
-        <div class="section-heading">
-          <h1>Board Games</h1>
-          <p>Browse your collection, pick something to play, and track backed titles in the same Buddy shell used by home and shopping.</p>
-        </div>
-        <div class="page-intro-meta">
-          <span class="badge">Collection browser</span>
-          <a href="/boardgames/pick" class="button-link btn-tonal">Pick games</a>
-          <a href="/boardgames/backed" class="button-link btn-tonal">Track backed</a>
+      <section class="card page-intro boardgames-overview" aria-label="Board games overview">
+        <div class="section-heading boardgames-overview-copy">
+          <span class="boardgames-kicker">Collection workspace</span>
+          <h1>Board game collection</h1>
+          <p>Load a BoardGameGeek user, scan the library, and jump to picking or backed tracking whenever you need either tool.</p>
+          <div class="boardgames-overview-points" aria-label="Board games workflow highlights">
+            <a href="/boardgames" class="chip" aria-current="page">Collection browser</a>
+            <a href="/boardgames/pick" class="chip">Quick pick</a>
+            <a href="/boardgames/backed" class="chip">Backed tracking</a>
+          </div>
         </div>
       </section>
 
-      <section class="card-shell boardgames-card">
+      <section class="card-shell boardgames-card boardgames-workspace">
         <div class="card-header">
           <div class="section-heading">
-            <h2>Collection workspace</h2>
-            <p>Search by username, keep the existing client-side filters, and sort the results table below.</p>
+            <span class="boardgames-kicker">Workspace</span>
+            <h2>Collection tools</h2>
+            <p>Load on the left, browse on the right, and keep filters and sorting close to the data they control.</p>
           </div>
-          <span class="badge">Table tools</span>
+          <div class="boardgames-workspace-meta">
+            <span class="badge">Two-panel workspace</span>
+            <span class="boardgames-meta-copy">Import controls stay separate from the collection table.</span>
+          </div>
         </div>
 
         <div class="card-body">
-          <div class="section-block">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>Collection filters</h2>
-                <p>Load a BoardGameGeek user, then narrow the visible rows without changing any backend behavior.</p>
-              </div>
-            </div>
-            <form action="/boardgames" method="GET" class="form-shell">
-              <div class="section-block">
-                <div class="form-grid">
+          <div class="boardgames-workspace-frame">
+            <div class="boardgames-view-grid">
+              <section class="section-block boardgames-panel-card boardgames-action-panel">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Action</span>
+                    <h2>Load collection</h2>
+                    <p>Search by user first, then keep Own and Prev Owned ready as instant client-side filters.</p>
+                  </div>
+                  <span class="chip active">BGG import</span>
+                </div>
+                <form action="/boardgames" method="GET" class="form-shell">
                   <div class="field">
                     <label for="username">Username</label>
                     <input type="text" id="username" name="username" placeholder="tthung1997">
@@ -88,80 +95,80 @@
                       <option value="no">No</option>
                     </select>
                   </div>
+                  <div class="boardgames-chip-row" aria-label="Collection filters summary">
+                    <label for="excludeExpansion" class="boardgames-inline-toggle">
+                      <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
+                      <span>Exclude expansions</span>
+                    </label>
+                    <span class="chip">Own filter</span>
+                    <span class="chip">Prev owned filter</span>
+                  </div>
                   <div class="form-actions">
                     <button type="submit" class="btn btn-filled">Search</button>
                   </div>
-                </div>
-              </div>
-              <div class="section-block">
-                <div class="chip-row boardgames-chip-row" aria-label="Collection filters summary">
-                  <span class="chip active">All games</span>
-                  <label for="excludeExpansion" class="chip">
-                    <input type="checkbox" id="excludeExpansion" name="excludeExpansion">
-                    <span>Exclude expansions</span>
-                  </label>
-                  <span class="chip">Client-side own filter</span>
-                  <span class="chip">Preorder tracking</span>
-                </div>
-              </div>
-            </form>
-          </div>
+                </form>
+                <div class="boardgames-section-note">Search loads the collection from BoardGameGeek. After that, the two ownership filters update the visible rows instantly.</div>
+              </section>
 
-          <div class="section-block table-shell">
-            <div class="section-header">
-              <div class="section-heading">
-                <h2>Collection</h2>
-                <p>Sort by Name or # Plays and use Track to open backed game details for preordered items.</p>
-              </div>
-              <span class="chip">Results table</span>
-            </div>
+              <section class="section-block boardgames-panel-card boardgames-data-panel table-shell">
+                <div class="section-header">
+                  <div class="section-heading">
+                    <span class="boardgames-section-label">Current library</span>
+                    <h2>Collection</h2>
+                    <p>Sort by Name or # Plays, then jump straight to backed tracking for anything already preordered.</p>
+                  </div>
+                  <span class="badge">Sortable browser</span>
+                </div>
+                <div class="boardgames-section-note">Use the headers to sort the table. The Track action appears only for preordered games.</div>
 
-            {{if .Error}}
-            <p><span class="error">Error: {{.Error}}</span></p>
-            {{else}}
-            <div class="table-responsive">
-              <table id="collectionTable">
-                <thead>
-                  <tr>
-                    <th id="nameHeader" class="sortable">Name</th>
-                    <th id="numPlaysHeader" class="sortable">#Plays</th>
-                    <th>Own</th>
-                    <th>PrevOwned</th>
-                    <th>ForTrade</th>
-                    <th>Want</th>
-                    <th>WantToPlay</th>
-                    <th>WantToBuy</th>
-                    <th>Wishlist</th>
-                    <th>Preordered</th>
-                    <th>Track</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{range .Collection.Items}}
-                  <tr>
-                    <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
-                    <td class="boardgames-center-cell">{{.NumPlays}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Own 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Want 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}✅{{end}}</td>
-                    <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}✅{{end}}</td>
-                    {{if eq .Status.Preordered 1}}
-                    <td>
-                      <a href="/boardgames/backed?name={{.Name}}" class="small-table-btn">Track</a>
-                    </td>
-                    {{else}}
-                    <td></td>
-                    {{end}}
-                  </tr>
-                  {{end}}
-                </tbody>
-              </table>
+                {{if .Error}}
+                <p><span class="error">Error: {{.Error}}</span></p>
+                {{else}}
+                <div class="table-responsive">
+                  <table id="collectionTable">
+                    <thead>
+                      <tr>
+                        <th id="nameHeader" class="sortable">Name</th>
+                        <th id="numPlaysHeader" class="sortable">#Plays</th>
+                        <th>Own</th>
+                        <th>PrevOwned</th>
+                        <th>ForTrade</th>
+                        <th>Want</th>
+                        <th>WantToPlay</th>
+                        <th>WantToBuy</th>
+                        <th>Wishlist</th>
+                        <th>Preordered</th>
+                        <th>Track</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{range .Collection.Items}}
+                      <tr>
+                        <td class="boardgames-name-cell"><strong>{{.Name}}</strong></td>
+                        <td class="boardgames-center-cell">{{.NumPlays}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Own 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.PrevOwned 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.ForTrade 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Want 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.WantToPlay 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.WantToBuy 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Wishlist 1}}&#10003;{{end}}</td>
+                        <td class="boardgames-center-cell">{{if eq .Status.Preordered 1}}&#10003;{{end}}</td>
+                        {{if eq .Status.Preordered 1}}
+                        <td>
+                          <a href="/boardgames/backed?name={{.Name}}" class="small-table-btn">Track</a>
+                        </td>
+                        {{else}}
+                        <td></td>
+                        {{end}}
+                      </tr>
+                      {{end}}
+                    </tbody>
+                  </table>
+                </div>
+                {{end}}
+              </section>
             </div>
-            {{end}}
           </div>
         </div>
       </section>
@@ -226,7 +233,7 @@
           let cellValue = row.cells[filter.columnIndex].innerText;
           let filterValue = document.getElementById(filter.elementId).value;
           showRow = showRow && ((filterValue === 'all') ||
-            (filterValue === 'yes' && cellValue === '✅') ||
+            (filterValue === 'yes' && cellValue === 'Γ£à') ||
             (filterValue === 'no' && cellValue === ''));
         });
         row.style.display = showRow ? '' : 'none';
