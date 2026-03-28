@@ -23,5 +23,8 @@ go.work
 # Database
 .db/
 
+# Secrets
+.env
+
 # Documentation
 docs/
