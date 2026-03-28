@@ -81,7 +81,7 @@
                   </div>
                   <div class="field">
                     <label for="ownFilter">Own</label>
-                    <select id="ownFilter">
+                    <select id="ownFilter" name="ownFilter">
                       <option value="all">All</option>
                       <option value="yes">Yes</option>
                       <option value="no">No</option>
@@ -89,7 +89,7 @@
                   </div>
                   <div class="field">
                     <label for="prevOwnedFilter">Prev Owned</label>
-                    <select id="prevOwnedFilter">
+                    <select id="prevOwnedFilter" name="prevOwnedFilter">
                       <option value="all">All</option>
                       <option value="yes">Yes</option>
                       <option value="no">No</option>
@@ -125,7 +125,7 @@
                 <p><span class="error">Error: {{.Error}}</span></p>
                 {{else}}
                 <div class="table-responsive">
-                  <table id="collectionTable">
+                  <table id="collectionTable" aria-live="polite">
                     <thead>
                       <tr>
                         <th id="nameHeader" class="sortable">Name</th>
@@ -166,6 +166,7 @@
                     </tbody>
                   </table>
                 </div>
+                <div id="pagination-controls" class="boardgames-pagination" aria-label="Pagination"></div>
                 {{end}}
               </section>
             </div>
@@ -173,17 +174,88 @@
         </div>
       </section>
     </main>
+    <footer class="bgg-attribution">
+      <a href="https://boardgamegeek.com" target="_blank" rel="noopener noreferrer" aria-label="Powered by BoardGameGeek">
+        <img class="bgg-logo bgg-logo-light" src="/static/bgg/powered-by-bgg-rgb.svg" alt="Powered by BoardGameGeek">
+        <img class="bgg-logo bgg-logo-dark" src="/static/bgg/powered-by-bgg-reversed-rgb.svg" alt="Powered by BoardGameGeek">
+      </a>
+    </footer>
   </div>
   <script>
     function unescapeParentheses(str) {
       return str.replace(/%28/g, "(").replace(/%29/g, ")");
     }
 
+    var currentPage = 1;
+    var pageSize = 25;
+
+    function getFilteredRows() {
+      var tbody = document.querySelector('#collectionTable tbody');
+      if (!tbody) return [];
+      return Array.from(tbody.rows).filter(function (row) {
+        return row.getAttribute('data-filtered-out') !== 'true';
+      });
+    }
+
+    function renderPage() {
+      var tbody = document.querySelector('#collectionTable tbody');
+      if (!tbody) return;
+      var allRows = Array.from(tbody.rows);
+      var filteredRows = allRows.filter(function (row) {
+        return row.getAttribute('data-filtered-out') !== 'true';
+      });
+      var totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+      if (currentPage > totalPages) currentPage = totalPages;
+      var start = (currentPage - 1) * pageSize;
+      var end = start + pageSize;
+      allRows.forEach(function (row) {
+        if (row.getAttribute('data-filtered-out') === 'true') {
+          row.style.display = 'none';
+        } else {
+          var idx = filteredRows.indexOf(row);
+          row.style.display = (idx >= start && idx < end) ? '' : 'none';
+        }
+      });
+      renderPaginationControls(filteredRows.length, totalPages);
+    }
+
+    function renderPaginationControls(totalItems, totalPages) {
+      var container = document.getElementById('pagination-controls');
+      if (!container) return;
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+      }
+      var start = (currentPage - 1) * pageSize + 1;
+      var end = Math.min(currentPage * pageSize, totalItems);
+      var html = '<div class="boardgames-pagination-info">' + start + '–' + end + ' of ' + totalItems + '</div>';
+      html += '<div class="boardgames-pagination-nav">';
+      html += '<button class="btn btn-tonal boardgames-page-btn" id="prevPageBtn" ' + (currentPage === 1 ? 'disabled' : '') + ' aria-label="Previous page">&#8592; Prev</button>';
+      for (var i = 1; i <= totalPages; i++) {
+        html += '<button class="btn ' + (i === currentPage ? 'btn-filled boardgames-page-btn-active' : 'btn-tonal') + ' boardgames-page-btn" data-page="' + i + '" aria-label="Page ' + i + '" aria-current="' + (i === currentPage ? 'page' : 'false') + '">' + i + '</button>';
+      }
+      html += '<button class="btn btn-tonal boardgames-page-btn" id="nextPageBtn" ' + (currentPage === totalPages ? 'disabled' : '') + ' aria-label="Next page">Next &#8594;</button>';
+      html += '</div>';
+      container.innerHTML = html;
+      document.getElementById('prevPageBtn').addEventListener('click', function () {
+        if (currentPage > 1) { currentPage--; renderPage(); }
+      });
+      document.getElementById('nextPageBtn').addEventListener('click', function () {
+        if (currentPage < totalPages) { currentPage++; renderPage(); }
+      });
+      container.querySelectorAll('[data-page]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          currentPage = parseInt(this.getAttribute('data-page'));
+          renderPage();
+        });
+      });
+    }
+
     let sortOrders = { name: true, numPlays: true };
 
     function sortTable(columnIndex, columnKey) {
       let table = document.getElementById('collectionTable');
-      let rows = Array.from(table.rows).slice(1);
+      let rows = Array.from(table.tBodies[0].rows);
       rows.sort(function (rowA, rowB) {
         let a = rowA.cells[columnIndex].innerText;
         let b = rowB.cells[columnIndex].innerText;
@@ -199,6 +271,8 @@
         table.tBodies[0].appendChild(row);
       });
       sortOrders[columnKey] = !sortOrders[columnKey];
+      currentPage = 1;
+      renderPage();
     }
 
     let nameHeader = document.getElementById('nameHeader');
@@ -226,18 +300,20 @@
       if (!table) {
         return;
       }
-      let rows = Array.from(table.rows).slice(1);
+      let rows = Array.from(table.tBodies[0].rows);
       rows.forEach(function (row) {
         let showRow = true;
         filters.forEach(function (filter) {
           let cellValue = row.cells[filter.columnIndex].innerText;
           let filterValue = document.getElementById(filter.elementId).value;
           showRow = showRow && ((filterValue === 'all') ||
-            (filterValue === 'yes' && cellValue === 'Γ£à') ||
+            (filterValue === 'yes' && cellValue === '\u2713') ||
             (filterValue === 'no' && cellValue === ''));
         });
-        row.style.display = showRow ? '' : 'none';
+        row.setAttribute('data-filtered-out', showRow ? 'false' : 'true');
       });
+      currentPage = 1;
+      renderPage();
     }
 
     filters.forEach(function (filter) {
@@ -246,6 +322,19 @@
         filterElement.addEventListener('change', applyFilters);
       }
     });
+
+    renderPage();
+
+    // Restore filter selections from URL params and apply on load
+    var urlParams = new URLSearchParams(window.location.search);
+    ['ownFilter', 'prevOwnedFilter'].forEach(function (id) {
+      var val = urlParams.get(id);
+      var el = document.getElementById(id);
+      if (el && val) {
+        el.value = val;
+      }
+    });
+    applyFilters();
   </script>
 </body>
 

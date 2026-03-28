@@ -1883,3 +1883,59 @@ tr[data-status="waiting"] td {
     height: 3.5rem;
   }
 }
+
+/* BGG attribution footer */
+.bgg-attribution {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 1rem;
+}
+
+.bgg-logo {
+  height: 36px;
+  width: auto;
+}
+
+html[data-theme="dark"] .bgg-logo-light {
+  display: none;
+}
+
+html[data-theme="light"] .bgg-logo-dark,
+html:not([data-theme="dark"]) .bgg-logo-dark {
+  display: none;
+}
+
+/* Collection table pagination */
+.boardgames-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0.25rem;
+}
+
+.boardgames-pagination-info {
+  font-size: 0.875rem;
+  color: var(--color-on-surface-muted);
+}
+
+.boardgames-pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.boardgames-page-btn {
+  min-height: 2rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+}
+
+.boardgames-page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
