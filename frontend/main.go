@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	appRandom "github.com/tthung1997/buddy/app/random"
 	"github.com/tthung1997/buddy/core/bgg"
 	coreRandom "github.com/tthung1997/buddy/core/random"
@@ -12,7 +14,23 @@ import (
 	"github.com/tthung1997/buddy/frontend/shopping"
 )
 
-var bggClient = bgg.NewClient(*bgg.DefaultClientConfig())
+var bggClient *bgg.Client
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("[Info] No .env file found, reading environment variables from system")
+	}
+	bggToken := os.Getenv("BGG_API_TOKEN")
+	if bggToken == "" {
+		log.Println("[Warning] BGG_API_TOKEN is not set; BGG API requests may be rejected")
+	}
+	bggClient = bgg.NewClient(bgg.ClientConfig{
+		Root:                bgg.Root,
+		BearerToken:         bggToken,
+		MaxRetries:          10,
+		RetryDelayInSeconds: 5,
+	})
+}
 var randomizer coreRandom.IRandomizer = appRandom.NewSimpleRandomizer()
 
 func logging(f http.HandlerFunc) http.HandlerFunc {

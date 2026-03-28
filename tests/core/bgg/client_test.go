@@ -12,6 +12,10 @@ import (
 func TestClient_GetThing_Success(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a successful response
 		rw.Write([]byte(`<item id="1"></item>`))
 	}))
@@ -21,6 +25,7 @@ func TestClient_GetThing_Success(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -41,6 +46,10 @@ func TestClient_GetThing_Success(t *testing.T) {
 func TestClient_GetThing_ServerError(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a server error
 		rw.WriteHeader(http.StatusInternalServerError)
 	}))
@@ -50,6 +59,7 @@ func TestClient_GetThing_ServerError(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -70,6 +80,10 @@ func TestClient_GetThing_ServerError(t *testing.T) {
 func TestClient_GetUser_Success(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a successful response
 		rw.Write([]byte(`<user id="1"></user>`))
 	}))
@@ -79,6 +93,7 @@ func TestClient_GetUser_Success(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -99,6 +114,10 @@ func TestClient_GetUser_Success(t *testing.T) {
 func TestClient_GetUser_NotFound(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a user not found response
 		rw.Write([]byte(`<user></user>`))
 	}))
@@ -108,6 +127,7 @@ func TestClient_GetUser_NotFound(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -123,6 +143,10 @@ func TestClient_GetUser_NotFound(t *testing.T) {
 func TestClient_GetCollection_Success(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a successful response
 		rw.Write([]byte(`<items><item objectid="1"></item></items>`))
 	}))
@@ -132,6 +156,7 @@ func TestClient_GetCollection_Success(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -152,6 +177,10 @@ func TestClient_GetCollection_Success(t *testing.T) {
 func TestClient_GetCollection_NotFound(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Respond with a collection not found response
 		rw.Write([]byte(`<items></items>`))
 	}))
@@ -161,6 +190,7 @@ func TestClient_GetCollection_NotFound(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          1,
 			RetryDelayInSeconds: 1,
 		},
@@ -183,6 +213,10 @@ func TestClient_GetCollection_Retry(t *testing.T) {
 
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		attempts++
 
 		if attempts == 1 {
@@ -200,6 +234,7 @@ func TestClient_GetCollection_Retry(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          2,
 			RetryDelayInSeconds: 1,
 		},
@@ -220,6 +255,10 @@ func TestClient_GetCollection_Retry(t *testing.T) {
 func TestClient_GetCollection_MaxRetriesExceeded(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Always respond with StatusAccepted
 		rw.WriteHeader(http.StatusAccepted)
 	}))
@@ -229,6 +268,7 @@ func TestClient_GetCollection_MaxRetriesExceeded(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          2,
 			RetryDelayInSeconds: 1,
 		},
@@ -244,6 +284,10 @@ func TestClient_GetCollection_MaxRetriesExceeded(t *testing.T) {
 func TestClient_GetCollection_UnexpectedResponseCode(t *testing.T) {
 	// Create a mock HTTP server
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		authHeader := req.Header.Get("Authorization")
+		if authHeader != "Bearer test-token" {
+			t.Errorf("expected Authorization header 'Bearer test-token', got '%s'", authHeader)
+		}
 		// Always respond with StatusBadRequest
 		rw.WriteHeader(http.StatusBadRequest)
 	}))
@@ -253,6 +297,7 @@ func TestClient_GetCollection_UnexpectedResponseCode(t *testing.T) {
 	client := bgg.NewClient(
 		bgg.ClientConfig{
 			Root:                server.URL,
+			BearerToken:         "test-token",
 			MaxRetries:          2,
 			RetryDelayInSeconds: 1,
 		},
@@ -263,4 +308,42 @@ func TestClient_GetCollection_UnexpectedResponseCode(t *testing.T) {
 	if err == nil || err.Error() != "unexpected response code: 400" {
 		t.Fatalf("expected unexpected response code error, got: %v", err)
 	}
+}
+
+func TestClient_GetUser_CorrectEndpointPath(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		if req.URL.Path != "/user" {
+			t.Errorf("expected path /user, got %s", req.URL.Path)
+		}
+		rw.Write([]byte(`<user id="1"></user>`))
+	}))
+	defer server.Close()
+	client := bgg.NewClient(bgg.ClientConfig{Root: server.URL, MaxRetries: 1, RetryDelayInSeconds: 1})
+	client.GetUser("testuser")
+}
+
+func TestClient_AuthorizationHeader_SentWhenTokenSet(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		auth := req.Header.Get("Authorization")
+		if auth != "Bearer my-token" {
+			t.Errorf("expected 'Bearer my-token', got '%s'", auth)
+		}
+		rw.Write([]byte(`<item id="1"></item>`))
+	}))
+	defer server.Close()
+	client := bgg.NewClient(bgg.ClientConfig{Root: server.URL, BearerToken: "my-token", MaxRetries: 1, RetryDelayInSeconds: 1})
+	client.GetThing("1")
+}
+
+func TestClient_AuthorizationHeader_OmittedWhenTokenEmpty(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		auth := req.Header.Get("Authorization")
+		if auth != "" {
+			t.Errorf("expected no Authorization header, got '%s'", auth)
+		}
+		rw.Write([]byte(`<item id="1"></item>`))
+	}))
+	defer server.Close()
+	client := bgg.NewClient(bgg.ClientConfig{Root: server.URL, MaxRetries: 1, RetryDelayInSeconds: 1})
+	client.GetThing("1")
 }

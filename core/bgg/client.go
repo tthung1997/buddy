@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Root = "https://www.boardgamegeek.com/xmlapi2"
+	Root = "https://boardgamegeek.com/xmlapi2"
 )
 
 type Client struct {
@@ -20,6 +20,7 @@ type Client struct {
 
 type ClientConfig struct {
 	Root                string
+	BearerToken         string
 	MaxRetries          int
 	RetryDelayInSeconds int
 }
@@ -32,10 +33,21 @@ func NewClient(config ClientConfig) *Client {
 	return &Client{Config: config}
 }
 
+func (c *Client) doRequest(url string) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if c.Config.BearerToken != "" {
+		req.Header.Set("Authorization", "Bearer "+c.Config.BearerToken)
+	}
+	return http.DefaultClient.Do(req)
+}
+
 func (c *Client) GetThing(id string) (string, error) {
 	url := c.Config.Root + "/thing?id=" + id
 
-	resp, err := http.Get(url)
+	resp, err := c.doRequest(url)
 	if err != nil {
 		return "", err
 	}
@@ -54,12 +66,13 @@ func (c *Client) GetThing(id string) (string, error) {
 }
 
 func (c *Client) GetUser(name string) (*User, error) {
-	url := c.Config.Root + "/users?name=" + name
+	url := c.Config.Root + "/user?name=" + name
 
-	resp, err := http.Get(url)
+	resp, err := c.doRequest(url)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -125,18 +138,19 @@ func (c *Client) GetCollection(filter CollectionFilter) (*Collection, error) {
 	for i := 0; i < c.Config.MaxRetries; i++ {
 		log.Printf("[Outgoing] GET %v", url)
 
-		resp, err := http.Get(url)
+		resp, err := c.doRequest(url)
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
 
 		log.Printf("[Outgoing] Status code: %v", resp.StatusCode)
 
 		if resp.StatusCode == http.StatusAccepted {
+			resp.Body.Close()
 			time.Sleep(time.Duration(c.Config.RetryDelayInSeconds) * time.Second)
 		} else if resp.StatusCode == http.StatusOK {
 			body, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
 			if err != nil {
 				return nil, err
 			}
@@ -149,6 +163,7 @@ func (c *Client) GetCollection(filter CollectionFilter) (*Collection, error) {
 
 			return &collection, nil
 		} else {
+			resp.Body.Close()
 			return nil, errors.New("unexpected response code: " + strconv.Itoa(resp.StatusCode))
 		}
 	}
