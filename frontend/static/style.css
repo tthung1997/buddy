@@ -2058,7 +2058,14 @@ a.cooking-stat-card:hover {
 }
 
 .cooking-toolbar .form-field {
+  flex: 0 1 14rem;
   min-width: 10rem;
+}
+
+.cooking-toolbar .form-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .cooking-match-grid {
@@ -2258,6 +2265,62 @@ a.cooking-stat-card:hover {
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+/* Single button forms are wrappers, not panels: strip the global form chrome so
+   a submit button sits flush next to a plain link. */
+.cooking-inline-actions form,
+.cooking-stat-card form,
+form.cooking-toolbar,
+form.cooking-scale-form {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.cooking-inline-actions form > input:not([type="hidden"]),
+.cooking-inline-actions form > select,
+.cooking-inline-actions form > button,
+.cooking-stat-card form > select,
+.cooking-stat-card form > button,
+form.cooking-scale-form > button {
+  width: auto;
+}
+
+.cooking-inline-actions form {
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Destructive actions stay recognisable without shouting over the primary one. */
+.cooking-inline-actions .btn-text.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.cooking-inline-actions .btn-text.btn-danger:hover {
+  background: var(--color-danger-container);
+  color: var(--color-on-danger-container);
+}
+
+.cooking-scale-form {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+form.cooking-scale-form > input[type="number"] {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  min-width: 0;
+}
+
+form.cooking-scale-form > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .cooking-feedback {
