@@ -95,18 +95,24 @@
                   {{range .Units}}<option value="{{.}}">{{.}}</option>{{end}}
                 </select>
               </div>
+              <label class="filter-checkbox" for="pantry-staple">
+                <input type="checkbox" id="pantry-staple">
+                Staple (just track if I have it)
+              </label>
               <div class="form-actions">
                 <button type="submit" class="btn btn-filled">Add to pantry</button>
               </div>
             </form>
+
+            <p class="cooking-hint">Staples like salt, oil, or rice are tracked as in stock, running low, or out, rather than by amount. Cooking never deducts them, and running low puts them on the shopping list without blocking tonight's dinner.</p>
 
             <div class="table-responsive table-shell">
               <table id="pantry-table">
                 <thead>
                   <tr>
                     <th>Ingredient</th>
-                    <th>Amount</th>
-                    <th>Unit</th>
+                    <th>Have</th>
+                    <th>Staple</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -133,6 +139,7 @@
                   <tr>
                     <th>Name</th>
                     <th>Category</th>
+                    <th>Staple</th>
                     <th>Default unit</th>
                     <th>Image URL</th>
                     <th>Actions</th>
@@ -153,6 +160,7 @@
 
     <script>
       const UNITS = [{{range $index, $unit := .Units}}{{if $index}}, {{end}}"{{$unit}}"{{end}}];
+      const STOCK_LEVELS = [{{range $index, $level := .StockLevels}}{{if $index}}, {{end}}{ value: "{{$level.Value}}", label: "{{$level.Label}}" }{{end}}];
 
       let pantry = [];
       let catalog = [];
@@ -180,6 +188,40 @@
         return select;
       }
 
+      function stockSelect(value, onChange) {
+        const select = document.createElement('select');
+        select.className = 'form-input cooking-stock-select';
+        select.dataset.stock = value || 'IN_STOCK';
+        for (const level of STOCK_LEVELS) {
+          const option = document.createElement('option');
+          option.value = level.value;
+          option.textContent = level.label;
+          if (level.value === value) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        }
+        select.addEventListener('change', () => {
+          select.dataset.stock = select.value;
+          onChange(select.value);
+        });
+        return select;
+      }
+
+      function checkbox(checked, label, onChange) {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'filter-checkbox';
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !!checked;
+        box.addEventListener('change', () => onChange(box.checked));
+        wrapper.appendChild(box);
+        if (label) {
+          wrapper.appendChild(document.createTextNode(' ' + label));
+        }
+        return wrapper;
+      }
+
       function textInput(value, type, onChange) {
         const input = document.createElement('input');
         input.className = 'form-input';
@@ -197,11 +239,21 @@
         const td = document.createElement('td');
         if (typeof content === 'string') {
           td.textContent = content;
+        } else if (Array.isArray(content)) {
+          const group = document.createElement('div');
+          group.className = 'cooking-cell-group';
+          content.forEach(node => group.appendChild(node));
+          td.appendChild(group);
         } else {
           td.appendChild(content);
         }
         row.appendChild(td);
         return td;
+      }
+
+      function isStaple(name) {
+        const known = catalog.find(i => (i.name || '').toLowerCase() === (name || '').toLowerCase());
+        return known ? !!known.staple : false;
       }
 
       async function loadPantry() {
@@ -233,8 +285,21 @@
         pantry.forEach((item, position) => {
           const row = document.createElement('tr');
           cell(row, textInput(item.name || item.ingredientId, 'text', value => { item.name = value; savePantry(); }));
-          cell(row, textInput(item.amount, 'number', value => { item.amount = parseFloat(value) || 0; savePantry(); }));
-          cell(row, unitSelect(item.unit, value => { item.unit = value; savePantry(); }));
+
+          // Staples record a level; everything else records an amount and unit.
+          if (item.staple) {
+            cell(row, stockSelect(item.stock || 'IN_STOCK', value => { item.stock = value; savePantry(); }));
+          } else {
+            cell(row, [
+              textInput(item.amount, 'number', value => { item.amount = parseFloat(value) || 0; savePantry(); }),
+              unitSelect(item.unit, value => { item.unit = value; savePantry(); })
+            ]);
+          }
+
+          cell(row, checkbox(item.staple, '', value => {
+            item.staple = value;
+            savePantry();
+          }));
 
           const remove = document.createElement('button');
           remove.type = 'button';
@@ -284,6 +349,7 @@
           const row = document.createElement('tr');
           cell(row, textInput(ingredient.name, 'text', value => { ingredient.name = value; saveCatalog(); }));
           cell(row, textInput(ingredient.category, 'text', value => { ingredient.category = value; saveCatalog(); }));
+          cell(row, checkbox(ingredient.staple, '', value => { ingredient.staple = value; saveCatalog(); }));
           cell(row, unitSelect(ingredient.defaultUnit, value => { ingredient.defaultUnit = value; saveCatalog(); }));
           cell(row, textInput(ingredient.imageUrl, 'url', value => { ingredient.imageUrl = value; saveCatalog(); }));
 
@@ -305,13 +371,28 @@
         document.getElementById('catalog-badge').textContent = catalog.length + ' items';
       }
 
+      // Typing a known ingredient pre-selects the unit and staple state it
+      // already has, so the same thing is never tracked two different ways.
       document.getElementById('pantry-name').addEventListener('change', () => {
         const name = document.getElementById('pantry-name').value.trim().toLowerCase();
         const known = catalog.find(ingredient => (ingredient.name || '').toLowerCase() === name);
-        if (known && known.defaultUnit) {
+        if (!known) {
+          return;
+        }
+        if (known.defaultUnit) {
           document.getElementById('pantry-unit').value = known.defaultUnit;
         }
+        document.getElementById('pantry-staple').checked = !!known.staple;
+        syncStapleFields();
       });
+
+      function syncStapleFields() {
+        const staple = document.getElementById('pantry-staple').checked;
+        document.getElementById('pantry-amount').closest('.form-field').hidden = staple;
+        document.getElementById('pantry-unit').closest('.form-field').hidden = staple;
+      }
+
+      document.getElementById('pantry-staple').addEventListener('change', syncStapleFields);
 
       document.getElementById('add-pantry-form').addEventListener('submit', async event => {
         event.preventDefault();
@@ -320,26 +401,34 @@
           return;
         }
 
+        const staple = document.getElementById('pantry-staple').checked;
         const amount = parseFloat(document.getElementById('pantry-amount').value) || 0;
         const unit = document.getElementById('pantry-unit').value;
-        const existing = pantry.find(item => (item.name || '').toLowerCase() === name.toLowerCase());
 
-        if (existing) {
-          existing.amount = amount;
-          existing.unit = unit;
+        const existing = pantry.find(item => (item.name || '').toLowerCase() === name.toLowerCase());
+        const entry = existing || { ingredientId: '', name: name };
+        entry.staple = staple;
+        if (staple) {
+          entry.stock = 'IN_STOCK';
         } else {
-          pantry.push({ ingredientId: '', name: name, amount: amount, unit: unit });
+          entry.amount = amount;
+          entry.unit = unit;
+        }
+        if (!existing) {
+          pantry.push(entry);
         }
 
         if (await savePantry()) {
           document.getElementById('pantry-name').value = '';
           document.getElementById('pantry-amount').value = '1';
+          document.getElementById('pantry-staple').checked = false;
+          syncStapleFields();
           await loadCatalog();
         }
       });
 
-      loadPantry();
-      loadCatalog();
+      syncStapleFields();
+      loadCatalog().then(loadPantry);
     </script>
   </body>
 </html>

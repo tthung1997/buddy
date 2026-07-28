@@ -15,6 +15,10 @@ type Ingredient struct {
 	DefaultUnit  Unit     `json:"defaultUnit"`
 	AllowedUnits []Unit   `json:"allowedUnits,omitempty"`
 	Tags         []string `json:"tags,omitempty"`
+	// Staple marks an ingredient nobody measures what is left of. Staples are
+	// tracked by presence through PantryItem.Stock rather than by amount, and
+	// cooking never deducts them.
+	Staple bool `json:"staple,omitempty"`
 	// GramsPerUnit is the mass of one DefaultUnit of this ingredient. It stays
 	// zero when unknown and exists so density aware volume to mass conversion
 	// can be added later without reshaping stored data.

@@ -53,6 +53,10 @@ func reasonLabel(reason cooking.MissingReason) string {
 		return "Not enough"
 	case cooking.MissingReasonUnitMismatch:
 		return "Unit mismatch"
+	case cooking.MissingReasonOutOfStock:
+		return "Out of stock"
+	case cooking.MissingReasonRunningLow:
+		return "Running low"
 	default:
 		return "Not in pantry"
 	}
@@ -75,6 +79,7 @@ func buildIngredientLine(ingredient cooking.RecipeIngredient, index map[string]c
 		Optional:     ingredient.Optional,
 		Note:         ingredient.Note,
 		ImageURL:     index[ingredient.IngredientId].ImageURL,
+		Staple:       index[ingredient.IngredientId].Staple,
 	}
 }
 
@@ -144,6 +149,9 @@ func buildMatchView(match cooking.RecipeMatch, index map[string]cooking.Ingredie
 			Unit:         matched.Unit,
 			Optional:     matched.Optional,
 			ImageURL:     index[matched.IngredientId].ImageURL,
+			Staple:       matched.Staple,
+			Stock:        matched.Stock,
+			StockLabel:   matched.Stock.Label(),
 		})
 	}
 
@@ -153,6 +161,12 @@ func buildMatchView(match cooking.RecipeMatch, index map[string]cooking.Ingredie
 		if !item.Optional {
 			blocking++
 		}
+
+		need := formatAmount(item.Amount) + " " + item.Unit.String()
+		if item.Staple {
+			need = ""
+		}
+
 		missing = append(missing, MissingLine{
 			IngredientLine: IngredientLine{
 				IngredientId: item.IngredientId,
@@ -162,9 +176,11 @@ func buildMatchView(match cooking.RecipeMatch, index map[string]cooking.Ingredie
 				Unit:         item.Unit,
 				Optional:     item.Optional,
 				ImageURL:     index[item.IngredientId].ImageURL,
+				Staple:       item.Staple,
 			},
 			Reason:      item.Reason,
 			ReasonLabel: reasonLabel(item.Reason),
+			NeedLabel:   need,
 		})
 	}
 

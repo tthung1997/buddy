@@ -24,8 +24,7 @@ The project is structured into several packages:
 The frontend serves the following modules:
 
 - **Board Games** (`/boardgames`): browse a BoardGameGeek collection, pick something to play, and track backed or preordered games.
-- **Cooking** (`/cooking`): keep recipes with their ordered steps and timings, track pantry amounts, and let Buddy join the two to answer what can be cooked right now. Missing ingredients can be pushed straight to the shopping list.
-- **Shopping** (`/shopping`): keep the household inventory current and queue the next store run.
+- **Cooking** (`/cooking`): keep recipes with their ordered steps and timings, track pantry amounts, and let Buddy join the two to answer what can be cooked right now. Missing ingredients can be pushed straight to the shopping list.- **Shopping** (`/shopping`): keep the household inventory current and queue the next store run.
 
 ### Cooking
 
@@ -36,6 +35,18 @@ The cooking module is built from three layers:
 - `frontend/cooking`: the dashboard, recipe library and editor, pantry workspace, and the "what can I cook" view.
 
 Recipes, ingredients, and the pantry are stored as JSON under `frontend/cooking/.db/`, which is gitignored and created on first run.
+
+#### Staples
+
+Some ingredients are not worth measuring. Salt, oil, and rice are either in the cupboard or they are not, so an ingredient can be marked a **staple** and is then tracked by presence instead of by amount:
+
+| | Measured ingredient | Staple |
+| --- | --- | --- |
+| Matching | compares amounts and converts units | satisfied while in stock or running low |
+| Cooking | deducts the amount used | left untouched |
+| Shopping list | `Flour (350 g)` | `Salt`, with no quantity |
+
+A staple carries one of three levels: **in stock**, **running low**, or **out of stock**. Running low still cooks tonight but reaches the shopping list, while out of stock blocks any recipe that needs it. Recipes keep their amounts either way, so a recipe still tells you to add 5 g of salt.
 
 ## How to Run
 

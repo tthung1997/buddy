@@ -129,7 +129,7 @@
               {{range .Match.Missing}}
               <li class="cooking-line cooking-line-missing">
                 <span>{{.Name}}{{if .Optional}} <span class="text-muted">(optional)</span>{{end}}</span>
-                <span class="cooking-line-amount">{{.AmountLabel}} {{.Unit}} &middot; {{.ReasonLabel}}</span>
+                <span class="cooking-line-amount">{{if .NeedLabel}}{{.NeedLabel}} &middot; {{end}}{{.ReasonLabel}}</span>
               </li>
               {{end}}
             </ul>

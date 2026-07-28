@@ -10,6 +10,17 @@ import (
 
 var _ coreCooking.ICookEngine = (*appCooking.PantryCookEngine)(nil)
 
+func pantryOf(items []coreCooking.PantryItem, staples ...string) coreCooking.Pantry {
+	catalog := map[string]coreCooking.Ingredient{}
+	for _, item := range items {
+		catalog[item.IngredientId] = coreCooking.Ingredient{Id: item.IngredientId, Name: item.IngredientId}
+	}
+	for _, id := range staples {
+		catalog[id] = coreCooking.Ingredient{Id: id, Name: id, Staple: true}
+	}
+	return coreCooking.NewPantry(items, catalog)
+}
+
 func newEngine() *appCooking.PantryCookEngine {
 	return appCooking.NewPantryCookEngine(appCooking.NewSimpleUnitConverter())
 }
@@ -57,7 +68,7 @@ func TestPantryCookEngine_Match_CookableWhenPantryCovers(t *testing.T) {
 		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantry, coreCooking.MatchOptions{})
+	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantryOf(pantry), coreCooking.MatchOptions{})
 	match := findMatch(t, matches, "pancakes")
 
 	if !match.Cookable {
@@ -81,7 +92,7 @@ func TestPantryCookEngine_Match_ReportsAbsentAndInsufficient(t *testing.T) {
 		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantry, coreCooking.MatchOptions{})
+	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantryOf(pantry), coreCooking.MatchOptions{})
 	match := findMatch(t, matches, "pancakes")
 
 	if match.Cookable {
@@ -113,7 +124,7 @@ func TestPantryCookEngine_Match_UnitMismatchDoesNotBreakTheMatch(t *testing.T) {
 		{IngredientId: "egg", Amount: 500, Unit: coreCooking.Gram},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantry, coreCooking.MatchOptions{})
+	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantryOf(pantry), coreCooking.MatchOptions{})
 	match := findMatch(t, matches, "pancakes")
 
 	if match.Cookable {
@@ -141,7 +152,7 @@ func TestPantryCookEngine_Match_IncludeOptional(t *testing.T) {
 		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantry, coreCooking.MatchOptions{IncludeOptional: true})
+	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantryOf(pantry), coreCooking.MatchOptions{IncludeOptional: true})
 	match := findMatch(t, matches, "pancakes")
 
 	if match.Cookable {
@@ -157,7 +168,7 @@ func TestPantryCookEngine_Match_ScalesToRequestedServings(t *testing.T) {
 		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantry, coreCooking.MatchOptions{Servings: 4})
+	matches := newEngine().Match([]coreCooking.Recipe{pancakes()}, pantryOf(pantry), coreCooking.MatchOptions{Servings: 4})
 	match := findMatch(t, matches, "pancakes")
 
 	if match.Servings != 4 {
@@ -197,7 +208,7 @@ func TestPantryCookEngine_Match_SortsCookableFirstThenCoverage(t *testing.T) {
 		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
 	}
 
-	matches := newEngine().Match([]coreCooking.Recipe{empty, partial, toast()}, pantry, coreCooking.MatchOptions{})
+	matches := newEngine().Match([]coreCooking.Recipe{empty, partial, toast()}, pantryOf(pantry), coreCooking.MatchOptions{})
 
 	if len(matches) != 3 {
 		t.Fatalf("expected 3 matches, got %d", len(matches))
@@ -219,12 +230,12 @@ func TestPantryCookEngine_Match_Filters(t *testing.T) {
 	}
 	recipes := []coreCooking.Recipe{pancakes(), toast()}
 
-	cookable := newEngine().Match(recipes, pantry, coreCooking.MatchOptions{OnlyCookable: true})
+	cookable := newEngine().Match(recipes, pantryOf(pantry), coreCooking.MatchOptions{OnlyCookable: true})
 	if len(cookable) != 1 || cookable[0].Recipe.Id != "toast" {
 		t.Fatalf("expected only toast, got %v", cookable)
 	}
 
-	covered := newEngine().Match(recipes, pantry, coreCooking.MatchOptions{MinCoverage: 0.5})
+	covered := newEngine().Match(recipes, pantryOf(pantry), coreCooking.MatchOptions{MinCoverage: 0.5})
 	if len(covered) != 1 || covered[0].Recipe.Id != "toast" {
 		t.Fatalf("expected only toast above the coverage floor, got %v", covered)
 	}
@@ -244,7 +255,7 @@ func TestPantryCookEngine_Match_MergesRepeatedIngredients(t *testing.T) {
 		{IngredientId: "flour", Amount: 450, Unit: coreCooking.Gram},
 	}
 
-	match := findMatch(t, newEngine().Match([]coreCooking.Recipe{recipe}, pantry, coreCooking.MatchOptions{}), "bread")
+	match := findMatch(t, newEngine().Match([]coreCooking.Recipe{recipe}, pantryOf(pantry), coreCooking.MatchOptions{}), "bread")
 	if match.Cookable {
 		t.Fatal("expected the merged 500 g requirement to exceed 450 g of flour")
 	}
@@ -264,7 +275,7 @@ func TestPantryCookEngine_ShoppingList_AggregatesAcrossPlans(t *testing.T) {
 		{Recipe: pancakes(), Servings: 4},
 	}
 
-	missing := newEngine().ShoppingList(plans, pantry)
+	missing := newEngine().ShoppingList(plans, pantryOf(pantry))
 
 	amounts := map[string]coreCooking.MissingIngredient{}
 	for _, item := range missing {
@@ -288,7 +299,7 @@ func TestPantryCookEngine_ShoppingList_LeavesPantryUntouched(t *testing.T) {
 		{IngredientId: "flour", Amount: 250, Unit: coreCooking.Gram},
 	}
 
-	newEngine().ShoppingList([]coreCooking.RecipePlan{{Recipe: pancakes()}}, pantry)
+	newEngine().ShoppingList([]coreCooking.RecipePlan{{Recipe: pancakes()}}, pantryOf(pantry))
 
 	assertClose(t, pantry[0].Amount, 250, "pantry after building a shopping list")
 }
@@ -300,7 +311,7 @@ func TestPantryCookEngine_Consume(t *testing.T) {
 		{IngredientId: "egg", Amount: 2, Unit: coreCooking.Piece},
 	}
 
-	updated, err := newEngine().Consume(pantry, pancakes(), 2)
+	updated, err := newEngine().Consume(pantryOf(pantry), pancakes(), 2)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -328,7 +339,7 @@ func TestPantryCookEngine_Consume_Insufficient(t *testing.T) {
 		{IngredientId: "egg", Amount: 2, Unit: coreCooking.Piece},
 	}
 
-	if _, err := newEngine().Consume(pantry, pancakes(), 2); !errors.Is(err, coreCooking.ErrInsufficientPantry) {
+	if _, err := newEngine().Consume(pantryOf(pantry), pancakes(), 2); !errors.Is(err, coreCooking.ErrInsufficientPantry) {
 		t.Fatalf("expected ErrInsufficientPantry, got %v", err)
 	}
 }
@@ -338,7 +349,7 @@ func TestPantryCookEngine_Consume_MissingIngredient(t *testing.T) {
 		{IngredientId: "flour", Amount: 1, Unit: coreCooking.Kilogram},
 	}
 
-	if _, err := newEngine().Consume(pantry, pancakes(), 2); !errors.Is(err, coreCooking.ErrInsufficientPantry) {
+	if _, err := newEngine().Consume(pantryOf(pantry), pancakes(), 2); !errors.Is(err, coreCooking.ErrInsufficientPantry) {
 		t.Fatalf("expected ErrInsufficientPantry, got %v", err)
 	}
 }
@@ -348,7 +359,7 @@ func TestPantryCookEngine_Consume_IncompatibleUnit(t *testing.T) {
 		{IngredientId: "bread", Amount: 500, Unit: coreCooking.Gram},
 	}
 
-	if _, err := newEngine().Consume(pantry, toast(), 1); !errors.Is(err, coreCooking.ErrIncompatibleUnits) {
+	if _, err := newEngine().Consume(pantryOf(pantry), toast(), 1); !errors.Is(err, coreCooking.ErrIncompatibleUnits) {
 		t.Fatalf("expected ErrIncompatibleUnits, got %v", err)
 	}
 }
@@ -358,7 +369,7 @@ func TestPantryCookEngine_Consume_ScalesServings(t *testing.T) {
 		{IngredientId: "bread", Amount: 10, Unit: coreCooking.Piece},
 	}
 
-	updated, err := newEngine().Consume(pantry, toast(), 3)
+	updated, err := newEngine().Consume(pantryOf(pantry), toast(), 3)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

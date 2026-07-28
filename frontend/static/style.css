@@ -2295,12 +2295,14 @@ form.cooking-scale-form > button {
 }
 
 /* Destructive actions stay recognisable without shouting over the primary one. */
-.cooking-inline-actions .btn-text.btn-danger {
+.cooking-inline-actions .btn-text.btn-danger,
+.cooking-page .small-table-btn.btn-danger {
   background: transparent;
   color: var(--color-danger);
 }
 
-.cooking-inline-actions .btn-text.btn-danger:hover {
+.cooking-inline-actions .btn-text.btn-danger:hover,
+.cooking-page .small-table-btn.btn-danger:hover {
   background: var(--color-danger-container);
   color: var(--color-on-danger-container);
 }
@@ -2325,6 +2327,42 @@ form.cooking-scale-form > button {
 
 .cooking-feedback {
   margin-bottom: 1rem;
+}
+
+.cooking-hint {
+  margin: 0.75rem 0 0;
+  color: var(--color-on-surface-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* Amount and unit share one cell so the pantry table can swap the pair out for
+   a single stock selector when the ingredient is a staple. */
+.cooking-cell-group {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.cooking-cell-group .form-input {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 4rem;
+}
+
+.cooking-stock-select {
+  width: auto;
+  min-width: 9rem;
+}
+
+.cooking-stock-select[data-stock="LOW"] {
+  border-color: color-mix(in srgb, var(--color-warning) 55%, var(--color-outline));
+  color: var(--color-on-warning-container);
+}
+
+.cooking-stock-select[data-stock="OUT"] {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-outline));
+  color: var(--color-danger);
 }
 
 @media (max-width: 720px) {

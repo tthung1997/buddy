@@ -71,7 +71,7 @@ func (c *CookingController) Index(w http.ResponseWriter, r *http.Request) {
 
 	data.RecipeCount = len(recipes)
 	data.IngredientCount = len(index)
-	data.PantryCount = len(pantry)
+	data.PantryCount = len(pantry.Items)
 
 	matches := c.Engine.Match(recipes, pantry, cooking.MatchOptions{})
 	for _, match := range matches {
@@ -167,7 +167,7 @@ func (c *CookingController) Recipe(w http.ResponseWriter, r *http.Request) {
 		redirectWithError(w, r, "/cooking/recipes", err)
 		return
 	}
-	pantry, err := c.PantryRepository.List()
+	pantry, err := c.loadPantry()
 	if err != nil {
 		redirectWithError(w, r, "/cooking/recipes", err)
 		return
@@ -283,7 +283,7 @@ func (c *CookingController) Complete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	servings := parseInt(r.FormValue("servings"), recipe.Servings)
-	pantry, err := c.PantryRepository.List()
+	pantry, err := c.loadPantry()
 	if err != nil {
 		redirectWithError(w, r, back, err)
 		return
@@ -294,7 +294,7 @@ func (c *CookingController) Complete(w http.ResponseWriter, r *http.Request) {
 		redirectWithError(w, r, back, err)
 		return
 	}
-	if err := c.savePantry(pantry, updated); err != nil {
+	if err := c.savePantry(pantry.Items, updated); err != nil {
 		redirectWithError(w, r, back, err)
 		return
 	}
@@ -331,7 +331,7 @@ func (c *CookingController) PushToShopping(w http.ResponseWriter, r *http.Reques
 		redirectWithError(w, r, back, err)
 		return
 	}
-	pantry, err := c.PantryRepository.List()
+	pantry, err := c.loadPantry()
 	if err != nil {
 		redirectWithError(w, r, back, err)
 		return
@@ -348,7 +348,7 @@ func (c *CookingController) PushToShopping(w http.ResponseWriter, r *http.Reques
 	items := make([]shopping.ShoppingItem, 0, len(missing))
 	for _, item := range missing {
 		items = append(items, shopping.ShoppingItem{
-			Name:  fmt.Sprintf("%s (%s %s)", ingredientName(index, item.IngredientId), formatAmount(item.Amount), item.Unit),
+			Name:  shoppingLabel(ingredientName(index, item.IngredientId), item),
 			Store: store,
 		})
 	}
@@ -373,6 +373,7 @@ func (c *CookingController) PantryPage(w http.ResponseWriter, r *http.Request) {
 		Success:       params.Get("success"),
 		Error:         params.Get("error"),
 		Units:         cooking.Units(),
+		StockLevels:   stockOptions(),
 		IngredientIds: []string{},
 	}
 
@@ -534,18 +535,32 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 		type pantryLine struct {
-			IngredientId string       `json:"ingredientId"`
-			Name         string       `json:"name"`
-			Amount       float64      `json:"amount"`
-			Unit         cooking.Unit `json:"unit"`
+			IngredientId string             `json:"ingredientId"`
+			Name         string             `json:"name"`
+			Amount       float64            `json:"amount"`
+			Unit         cooking.Unit       `json:"unit"`
+			Staple       bool               `json:"staple"`
+			Stock        cooking.StockLevel `json:"stock"`
 		}
 		lines := make([]pantryLine, 0, len(pantry))
 		for _, item := range pantry {
+			staple := index[item.IngredientId].Staple
+			stock := item.Stock
+			if staple && !stock.IsValid() {
+				// An entry that predates the staple flag carries an amount; any
+				// amount at all means there is some in the cupboard.
+				stock = cooking.OutOfStock
+				if item.Amount > 0 {
+					stock = cooking.InStock
+				}
+			}
 			lines = append(lines, pantryLine{
 				IngredientId: item.IngredientId,
 				Name:         ingredientName(index, item.IngredientId),
 				Amount:       item.Amount,
 				Unit:         item.Unit,
+				Staple:       staple,
+				Stock:        stock,
 			})
 		}
 		writeJSON(w, lines)
@@ -555,6 +570,8 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 			Name         string  `json:"name"`
 			Amount       float64 `json:"amount"`
 			Unit         string  `json:"unit"`
+			Stock        string  `json:"stock"`
+			Staple       *bool   `json:"staple"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&incoming); err != nil {
 			writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -581,6 +598,30 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 				writeJSONError(w, http.StatusBadRequest, "every pantry entry needs an ingredient")
 				return
 			}
+			if kept[id] {
+				continue
+			}
+
+			// The staple checkbox lives on the pantry row, so an incoming flag
+			// is authoritative and promotes a brand new ingredient too.
+			if line.Staple != nil {
+				if err := resolver.setStaple(id, *line.Staple); err != nil {
+					writeJSONError(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+			}
+
+			// Staples record a stock level instead of an amount, so they skip
+			// the unit and amount validation entirely.
+			if resolver.isStaple(id) {
+				pantry = append(pantry, cooking.PantryItem{
+					IngredientId:    id,
+					Stock:           cooking.ParseStockLevel(line.Stock),
+					UpdatedDateTime: now,
+				})
+				kept[id] = true
+				continue
+			}
 
 			unit, err := cooking.ParseUnit(line.Unit)
 			if err != nil {
@@ -590,9 +631,6 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 			if line.Amount < 0 {
 				writeJSONError(w, http.StatusBadRequest, label+": the amount must not be negative")
 				return
-			}
-			if kept[id] {
-				continue
 			}
 
 			pantry = append(pantry, cooking.PantryItem{
@@ -615,20 +653,33 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (c *CookingController) load() ([]cooking.Recipe, map[string]cooking.Ingredient, []cooking.PantryItem, error) {
+func (c *CookingController) load() ([]cooking.Recipe, map[string]cooking.Ingredient, cooking.Pantry, error) {
 	recipes, err := c.RecipeRepository.List()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, cooking.Pantry{}, err
 	}
 	index, err := c.ingredientIndex()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, cooking.Pantry{}, err
 	}
-	pantry, err := c.PantryRepository.List()
+	items, err := c.PantryRepository.List()
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, cooking.Pantry{}, err
 	}
-	return recipes, index, pantry, nil
+	return recipes, index, cooking.NewPantry(items, index), nil
+}
+
+// loadPantry reads the pantry together with the catalog that describes it.
+func (c *CookingController) loadPantry() (cooking.Pantry, error) {
+	index, err := c.ingredientIndex()
+	if err != nil {
+		return cooking.Pantry{}, err
+	}
+	items, err := c.PantryRepository.List()
+	if err != nil {
+		return cooking.Pantry{}, err
+	}
+	return cooking.NewPantry(items, index), nil
 }
 
 func (c *CookingController) ingredientIndex() (map[string]cooking.Ingredient, error) {
@@ -735,6 +786,27 @@ func (r *ingredientResolver) resolve(id string, label string, unit string) (stri
 	r.byId[newId] = ingredient
 	r.byName[strings.ToLower(label)] = newId
 	return newId, nil
+}
+
+// setStaple updates whether a resolved ingredient is tracked by presence.
+func (r *ingredientResolver) setStaple(id string, staple bool) error {
+	ingredient, exists := r.byId[id]
+	if !exists || ingredient.Staple == staple {
+		return nil
+	}
+
+	ingredient.Staple = staple
+	ingredient.UpdatedDateTime = time.Now()
+	if err := r.repository.CreateOrUpdate(ingredient); err != nil {
+		return err
+	}
+	r.byId[id] = ingredient
+	return nil
+}
+
+// isStaple reports whether a resolved ingredient is tracked by presence.
+func (r *ingredientResolver) isStaple(id string) bool {
+	return r.byId[id].Staple
 }
 
 // freeId derives an id from a label that no other ingredient is using.
@@ -957,6 +1029,24 @@ func hasTag(recipe cooking.Recipe, tag string) bool {
 		}
 	}
 	return false
+}
+
+func stockOptions() []StockOption {
+	levels := cooking.StockLevels()
+	options := make([]StockOption, 0, len(levels))
+	for _, level := range levels {
+		options = append(options, StockOption{Value: level, Label: level.Label()})
+	}
+	return options
+}
+
+// shoppingLabel names a missing ingredient for the shopping list. Staples carry
+// no quantity, so they go on the list by name alone.
+func shoppingLabel(name string, item cooking.MissingIngredient) string {
+	if item.Staple {
+		return name
+	}
+	return fmt.Sprintf("%s (%s %s)", name, formatAmount(item.Amount), item.Unit)
 }
 
 func slugify(value string) string {

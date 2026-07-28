@@ -14,6 +14,12 @@ const (
 	// MissingReasonUnitMismatch means the pantry holds the ingredient in a unit
 	// that cannot be compared with the one the recipe asks for.
 	MissingReasonUnitMismatch MissingReason = "UNIT_MISMATCH"
+	// MissingReasonOutOfStock means a staple has run out. Staples carry no
+	// amount, so this replaces absent and insufficient for them.
+	MissingReasonOutOfStock MissingReason = "OUT_OF_STOCK"
+	// MissingReasonRunningLow means a staple still cooks tonight but should be
+	// restocked. It never blocks a recipe, so it only reaches shopping lists.
+	MissingReasonRunningLow MissingReason = "RUNNING_LOW"
 )
 
 type MatchedIngredient struct {
@@ -22,13 +28,19 @@ type MatchedIngredient struct {
 	Available    float64 `json:"available"`
 	Unit         Unit    `json:"unit"`
 	Optional     bool    `json:"optional,omitempty"`
+	// Staple marks an ingredient satisfied by presence rather than by amount.
+	Staple bool `json:"staple,omitempty"`
+	// Stock carries the staple's level so a view can say "running low" instead
+	// of printing an amount that was never tracked.
+	Stock StockLevel `json:"stock,omitempty"`
 }
 
 type MissingIngredient struct {
 	IngredientId string        `json:"ingredientId"`
-	Amount       float64       `json:"amount"`
-	Unit         Unit          `json:"unit"`
+	Amount       float64       `json:"amount,omitempty"`
+	Unit         Unit          `json:"unit,omitempty"`
 	Optional     bool          `json:"optional,omitempty"`
+	Staple       bool          `json:"staple,omitempty"`
 	Reason       MissingReason `json:"reason"`
 }
 
@@ -64,11 +76,12 @@ type ICookEngine interface {
 	// Match joins the pantry against each recipe and reports what is available,
 	// what is missing, and whether the recipe can be cooked right now. Results
 	// are ordered with cookable recipes first, then by descending coverage.
-	Match(recipes []Recipe, pantry []PantryItem, options MatchOptions) []RecipeMatch
+	Match(recipes []Recipe, pantry Pantry, options MatchOptions) []RecipeMatch
 	// ShoppingList aggregates everything the pantry cannot cover for the given
-	// plans into one deduplicated list.
-	ShoppingList(plans []RecipePlan, pantry []PantryItem) []MissingIngredient
+	// plans into one deduplicated list, including staples that have run out or
+	// are running low.
+	ShoppingList(plans []RecipePlan, pantry Pantry) []MissingIngredient
 	// Consume deducts the ingredients a recipe uses from the pantry and returns
-	// the updated pantry.
-	Consume(pantry []PantryItem, recipe Recipe, servings int) ([]PantryItem, error)
+	// the updated items. Staples are left untouched.
+	Consume(pantry Pantry, recipe Recipe, servings int) ([]PantryItem, error)
 }

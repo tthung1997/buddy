@@ -15,6 +15,11 @@ type IngredientLine struct {
 	Optional     bool
 	Note         string
 	ImageURL     string
+	// Staple lines are tracked by presence, so StockLabel carries what the
+	// pantry knows instead of an amount that was never recorded.
+	Staple     bool
+	Stock      cooking.StockLevel
+	StockLabel string
 }
 
 // MissingLine explains why an ingredient keeps a recipe off the menu.
@@ -22,6 +27,9 @@ type MissingLine struct {
 	IngredientLine
 	Reason      cooking.MissingReason
 	ReasonLabel string
+	// NeedLabel is what to show on the right of the row: an amount for measured
+	// ingredients, nothing for staples.
+	NeedLabel string
 }
 
 type StepView struct {
@@ -108,7 +116,14 @@ type PantryPageData struct {
 	Error         string
 	Success       string
 	Units         []cooking.Unit
+	StockLevels   []StockOption
 	IngredientIds []string
+}
+
+// StockOption pairs a stock level with its label for the pantry selector.
+type StockOption struct {
+	Value cooking.StockLevel
+	Label string
 }
 
 type EditPageData struct {
