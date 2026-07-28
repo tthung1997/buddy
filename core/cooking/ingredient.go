@@ -55,5 +55,8 @@ type IIngredientRepository interface {
 	List() ([]Ingredient, error)
 	Get(id string) (Ingredient, error)
 	CreateOrUpdate(Ingredient) error
+	// ReplaceAll swaps the whole catalog in a single step so a bulk edit cannot
+	// interleave with another writer.
+	ReplaceAll([]Ingredient) error
 	Delete(id string) error
 }

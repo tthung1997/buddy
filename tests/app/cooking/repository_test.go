@@ -150,6 +150,67 @@ func TestLocalIngredientRepository_RoundTrip(t *testing.T) {
 	}
 }
 
+func TestLocalPantryRepository_ReplaceAll(t *testing.T) {
+	repo, err := repository.NewLocalPantryRepository(filepath.Join(t.TempDir(), "pantry.json"))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if err := repo.CreateOrUpdate(coreCooking.PantryItem{IngredientId: "milk", Amount: 1, Unit: coreCooking.Liter}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := repo.ReplaceAll([]coreCooking.PantryItem{
+		{IngredientId: "flour", Amount: 500, Unit: coreCooking.Gram},
+		{IngredientId: "egg", Amount: 6, Unit: coreCooking.Piece},
+	}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	items, err := repo.List()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("expected the pantry to be replaced, got %d items", len(items))
+	}
+	if _, err := repo.Get("milk"); !errors.Is(err, coreCooking.ErrPantryItemNotFound) {
+		t.Fatalf("expected the previous entry to be gone, got %v", err)
+	}
+
+	if err := repo.ReplaceAll(nil); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	items, err = repo.List()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(items) != 0 {
+		t.Fatalf("expected an empty pantry, got %d items", len(items))
+	}
+}
+
+func TestLocalIngredientRepository_ReplaceAll_RejectsEmptyId(t *testing.T) {
+	repo, err := repository.NewLocalIngredientRepository(filepath.Join(t.TempDir(), "ingredients.json"))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if err := repo.CreateOrUpdate(coreCooking.Ingredient{Id: "flour", Name: "Flour", DefaultUnit: coreCooking.Gram}); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := repo.ReplaceAll([]coreCooking.Ingredient{{Name: "Nameless"}}); err == nil {
+		t.Fatal("expected an error when replacing with an ingredient without an id")
+	}
+
+	ingredients, err := repo.List()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(ingredients) != 1 || ingredients[0].Id != "flour" {
+		t.Fatalf("expected the rejected write to leave the catalog untouched, got %v", ingredients)
+	}
+}
+
 func TestLocalPantryRepository_RoundTrip(t *testing.T) {
 	repo, err := repository.NewLocalPantryRepository(filepath.Join(t.TempDir(), "pantry.json"))
 	if err != nil {

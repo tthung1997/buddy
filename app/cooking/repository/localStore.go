@@ -117,3 +117,18 @@ func (s *localStore[T]) remove(key string) error {
 	delete(items, key)
 	return s.save(items)
 }
+
+// replaceAll swaps the whole collection under a single lock so a bulk edit
+// cannot interleave with another writer.
+func (s *localStore[T]) replaceAll(items map[string]T) error {
+	for key := range items {
+		if key == "" {
+			return errEmptyKey
+		}
+	}
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	return s.save(items)
+}

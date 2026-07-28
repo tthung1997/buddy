@@ -51,6 +51,14 @@ func (r *LocalPantryRepository) CreateOrUpdate(item cooking.PantryItem) error {
 	return r.store.put(item.IngredientId, item)
 }
 
+func (r *LocalPantryRepository) ReplaceAll(items []cooking.PantryItem) error {
+	entries := make(map[string]cooking.PantryItem, len(items))
+	for _, item := range items {
+		entries[item.IngredientId] = item
+	}
+	return r.store.replaceAll(entries)
+}
+
 func (r *LocalPantryRepository) Delete(ingredientId string) error {
 	return r.store.remove(ingredientId)
 }

@@ -19,6 +19,7 @@ import (
 
 var bggClient *bgg.Client
 var cookingController *cooking.CookingController
+var randomizer coreRandom.IRandomizer = appRandom.NewSimpleRandomizer()
 
 const cookingDbDir = "frontend/cooking/.db"
 
@@ -57,7 +58,6 @@ func init() {
 		randomizer,
 	)
 }
-var randomizer coreRandom.IRandomizer = appRandom.NewSimpleRandomizer()
 
 func logging(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

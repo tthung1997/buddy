@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/tthung1997/buddy/core/cooking"
 	"github.com/tthung1997/buddy/core/random"
@@ -481,24 +482,19 @@ func (c *CookingController) IngredientsAPI(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		existing, err := c.IngredientRepository.List()
-		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
 		now := time.Now()
-		kept := map[string]bool{}
+		catalog := []cooking.Ingredient{}
+		taken := map[string]bool{}
 		for _, ingredient := range incoming {
 			ingredient.Name = strings.TrimSpace(ingredient.Name)
 			if ingredient.Name == "" {
 				continue
 			}
-			if ingredient.Id == "" {
-				ingredient.Id = slugify(ingredient.Name)
-			}
-			if ingredient.Id == "" {
-				continue
+			ingredient.Id = strings.TrimSpace(ingredient.Id)
+			if ingredient.Id == "" || taken[ingredient.Id] {
+				ingredient.Id = freeIngredientId(ingredient.Name, func(candidate string) bool {
+					return taken[candidate]
+				})
 			}
 			if unit, err := cooking.ParseUnit(string(ingredient.DefaultUnit)); err == nil {
 				ingredient.DefaultUnit = unit
@@ -506,24 +502,16 @@ func (c *CookingController) IngredientsAPI(w http.ResponseWriter, r *http.Reques
 				ingredient.DefaultUnit = cooking.Piece
 			}
 			ingredient.UpdatedDateTime = now
-			if err := c.IngredientRepository.CreateOrUpdate(ingredient); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-			kept[ingredient.Id] = true
+			catalog = append(catalog, ingredient)
+			taken[ingredient.Id] = true
 		}
 
-		for _, ingredient := range existing {
-			if kept[ingredient.Id] {
-				continue
-			}
-			if err := c.IngredientRepository.Delete(ingredient.Id); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
+		if err := c.IngredientRepository.ReplaceAll(catalog); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
 		}
 
-		writeJSON(w, map[string]int{"count": len(kept)})
+		writeJSON(w, map[string]int{"count": len(catalog)})
 	default:
 		writeJSONError(w, http.StatusMethodNotAllowed, "only GET and POST are supported")
 	}
@@ -573,26 +561,25 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		existing, err := c.PantryRepository.List()
+		resolver, err := c.newIngredientResolver()
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		now := time.Now()
+		pantry := []cooking.PantryItem{}
 		kept := map[string]bool{}
 		for _, line := range incoming {
 			label := strings.TrimSpace(line.Name)
-			if label == "" {
-				label = strings.TrimSpace(line.IngredientId)
-			}
-			id, err := c.ensureIngredient(label, line.Unit)
+			id, err := resolver.resolve(line.IngredientId, label, line.Unit)
 			if err != nil {
-				writeJSONError(w, http.StatusBadRequest, err.Error())
+				writeJSONError(w, http.StatusInternalServerError, err.Error())
 				return
 			}
 			if id == "" {
-				continue
+				writeJSONError(w, http.StatusBadRequest, "every pantry entry needs an ingredient")
+				return
 			}
 
 			unit, err := cooking.ParseUnit(line.Unit)
@@ -604,30 +591,25 @@ func (c *CookingController) PantryAPI(w http.ResponseWriter, r *http.Request) {
 				writeJSONError(w, http.StatusBadRequest, label+": the amount must not be negative")
 				return
 			}
+			if kept[id] {
+				continue
+			}
 
-			if err := c.PantryRepository.CreateOrUpdate(cooking.PantryItem{
+			pantry = append(pantry, cooking.PantryItem{
 				IngredientId:    id,
 				Amount:          line.Amount,
 				Unit:            unit,
 				UpdatedDateTime: now,
-			}); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
+			})
 			kept[id] = true
 		}
 
-		for _, item := range existing {
-			if kept[item.IngredientId] {
-				continue
-			}
-			if err := c.PantryRepository.Delete(item.IngredientId); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, err.Error())
-				return
-			}
+		if err := c.PantryRepository.ReplaceAll(pantry); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, err.Error())
+			return
 		}
 
-		writeJSON(w, map[string]int{"count": len(kept)})
+		writeJSON(w, map[string]int{"count": len(pantry)})
 	default:
 		writeJSONError(w, http.StatusMethodNotAllowed, "only GET and POST are supported")
 	}
@@ -684,33 +666,95 @@ func (c *CookingController) savePantry(before []cooking.PantryItem, after []cook
 	return nil
 }
 
-// ensureIngredient resolves a free text ingredient label to a catalog id,
-// creating the catalog entry when it is new.
-func (c *CookingController) ensureIngredient(label string, unit string) (string, error) {
+// ingredientResolver maps the free text labels the pages work with onto stable
+// catalog ids. Names are matched case insensitively so renaming an ingredient
+// in the catalog keeps every recipe and pantry entry pointing at it.
+type ingredientResolver struct {
+	repository cooking.IIngredientRepository
+	byId       map[string]cooking.Ingredient
+	byName     map[string]string
+}
+
+func (c *CookingController) newIngredientResolver() (*ingredientResolver, error) {
+	ingredients, err := c.IngredientRepository.List()
+	if err != nil {
+		return nil, err
+	}
+
+	resolver := &ingredientResolver{
+		repository: c.IngredientRepository,
+		byId:       make(map[string]cooking.Ingredient, len(ingredients)),
+		byName:     make(map[string]string, len(ingredients)),
+	}
+	for _, ingredient := range ingredients {
+		resolver.byId[ingredient.Id] = ingredient
+		name := strings.ToLower(strings.TrimSpace(ingredient.Name))
+		if _, taken := resolver.byName[name]; name != "" && !taken {
+			resolver.byName[name] = ingredient.Id
+		}
+	}
+
+	return resolver, nil
+}
+
+// resolve returns the catalog id for a label, creating the catalog entry when
+// the label is new. An empty result means there was nothing to resolve.
+func (r *ingredientResolver) resolve(id string, label string, unit string) (string, error) {
 	label = strings.TrimSpace(label)
+	id = strings.TrimSpace(id)
+
+	if id != "" {
+		if known, exists := r.byId[id]; exists && (label == "" || strings.EqualFold(known.Name, label)) {
+			return id, nil
+		}
+	}
 	if label == "" {
+		if _, exists := r.byId[id]; exists {
+			return id, nil
+		}
 		return "", nil
 	}
-
-	id := slugify(label)
-	if id == "" {
-		return "", nil
-	}
-	if _, err := c.IngredientRepository.Get(id); err == nil {
-		return id, nil
+	if known, exists := r.byName[strings.ToLower(label)]; exists {
+		return known, nil
 	}
 
-	defaultUnit := cooking.Piece
-	if parsed, err := cooking.ParseUnit(unit); err == nil {
-		defaultUnit = parsed
-	}
-
-	return id, c.IngredientRepository.CreateOrUpdate(cooking.Ingredient{
-		Id:              id,
+	newId := r.freeId(label)
+	ingredient := cooking.Ingredient{
+		Id:              newId,
 		Name:            label,
-		DefaultUnit:     defaultUnit,
+		DefaultUnit:     cooking.Piece,
 		UpdatedDateTime: time.Now(),
+	}
+	if parsed, err := cooking.ParseUnit(unit); err == nil {
+		ingredient.DefaultUnit = parsed
+	}
+	if err := r.repository.CreateOrUpdate(ingredient); err != nil {
+		return "", err
+	}
+
+	r.byId[newId] = ingredient
+	r.byName[strings.ToLower(label)] = newId
+	return newId, nil
+}
+
+// freeId derives an id from a label that no other ingredient is using.
+func (r *ingredientResolver) freeId(label string) string {
+	return freeIngredientId(label, func(candidate string) bool {
+		_, taken := r.byId[candidate]
+		return taken
 	})
+}
+
+func fnv32(value string) uint32 {
+	const offset uint32 = 2166136261
+	const prime uint32 = 16777619
+
+	hash := offset
+	for _, symbol := range value {
+		hash ^= uint32(symbol)
+		hash *= prime
+	}
+	return hash
 }
 
 // normalizeRecipe validates an incoming recipe, resolves free text ingredient
@@ -724,6 +768,11 @@ func (c *CookingController) normalizeRecipe(recipe *cooking.Recipe) error {
 		recipe.Servings = 1
 	}
 
+	resolver, err := c.newIngredientResolver()
+	if err != nil {
+		return err
+	}
+
 	tags := []string{}
 	for _, tag := range recipe.Tags {
 		if tag = strings.TrimSpace(tag); tag != "" {
@@ -732,7 +781,7 @@ func (c *CookingController) normalizeRecipe(recipe *cooking.Recipe) error {
 	}
 	recipe.Tags = tags
 
-	ingredients, err := c.normalizeIngredients(recipe.Ingredients)
+	ingredients, err := normalizeIngredients(resolver, recipe.Ingredients)
 	if err != nil {
 		return err
 	}
@@ -758,7 +807,7 @@ func (c *CookingController) normalizeRecipe(recipe *cooking.Recipe) error {
 			step.DurationUnit = ""
 		}
 
-		stepIngredients, err := c.normalizeIngredients(step.Ingredients)
+		stepIngredients, err := normalizeIngredients(resolver, step.Ingredients)
 		if err != nil {
 			return err
 		}
@@ -792,7 +841,7 @@ func (c *CookingController) normalizeRecipe(recipe *cooking.Recipe) error {
 	return nil
 }
 
-func (c *CookingController) normalizeIngredients(ingredients []cooking.RecipeIngredient) ([]cooking.RecipeIngredient, error) {
+func normalizeIngredients(resolver *ingredientResolver, ingredients []cooking.RecipeIngredient) ([]cooking.RecipeIngredient, error) {
 	normalized := []cooking.RecipeIngredient{}
 	for _, ingredient := range ingredients {
 		label := strings.TrimSpace(ingredient.IngredientId)
@@ -808,12 +857,12 @@ func (c *CookingController) normalizeIngredients(ingredients []cooking.RecipeIng
 			return nil, fmt.Errorf("%s: %w", label, err)
 		}
 
-		id, err := c.ensureIngredient(label, string(unit))
+		id, err := resolver.resolve("", label, string(unit))
 		if err != nil {
 			return nil, err
 		}
 		if id == "" {
-			continue
+			return nil, fmt.Errorf("%s: could not be identified as an ingredient", label)
 		}
 
 		ingredient.IngredientId = id
@@ -916,7 +965,7 @@ func slugify(value string) string {
 
 	for _, symbol := range strings.ToLower(strings.TrimSpace(value)) {
 		switch {
-		case symbol >= 'a' && symbol <= 'z', symbol >= '0' && symbol <= '9':
+		case unicode.IsLetter(symbol), unicode.IsDigit(symbol):
 			builder.WriteRune(symbol)
 			previousDash = false
 		default:
@@ -928,6 +977,24 @@ func slugify(value string) string {
 	}
 
 	return strings.Trim(builder.String(), "-")
+}
+
+// freeIngredientId derives an id from a label that is not already taken.
+func freeIngredientId(label string, taken func(string) bool) string {
+	base := slugify(label)
+	if base == "" {
+		// A label made only of symbols, an emoji for instance, still needs a
+		// stable key of its own rather than being dropped.
+		base = fmt.Sprintf("ingredient-%08x", fnv32(strings.ToLower(strings.TrimSpace(label))))
+	}
+
+	candidate := base
+	for suffix := 2; ; suffix++ {
+		if !taken(candidate) {
+			return candidate
+		}
+		candidate = fmt.Sprintf("%s-%d", base, suffix)
+	}
 }
 
 func parseInt(value string, fallback int) int {

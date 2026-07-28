@@ -18,5 +18,8 @@ type IPantryRepository interface {
 	List() ([]PantryItem, error)
 	Get(ingredientId string) (PantryItem, error)
 	CreateOrUpdate(PantryItem) error
+	// ReplaceAll swaps the whole pantry in a single step so a bulk edit cannot
+	// interleave with another writer.
+	ReplaceAll([]PantryItem) error
 	Delete(ingredientId string) error
 }

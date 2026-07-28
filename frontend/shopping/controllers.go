@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 const staticDir = "frontend/shopping/static"
@@ -15,6 +16,11 @@ const inventoryFile = dbDir + "/inventory.json"
 const shoppingListFile = dbDir + "/shopping_list.json"
 
 var indexTmpl *template.Template = template.Must(template.ParseFiles(staticDir + "/index.html"))
+
+// fileMutex serializes the read-modify-write cycles on the JSON files. Other
+// modules can append to the shopping list, so a full file write must never
+// interleave with another one.
+var fileMutex sync.Mutex
 
 type InventoryItem struct {
 	Name  string `json:"name"`
@@ -34,7 +40,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 func InventoryHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		items, err := loadItems[InventoryItem](inventoryFile)
+		items, err := readItems[InventoryItem](inventoryFile)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -43,7 +49,7 @@ func InventoryHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		var items []InventoryItem
 		json.NewDecoder(r.Body).Decode(&items)
-		if err := saveItems(inventoryFile, items); err != nil {
+		if err := writeFile(inventoryFile, items); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -54,7 +60,7 @@ func InventoryHandler(w http.ResponseWriter, r *http.Request) {
 func ShoppingListHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		items, err := loadItems[ShoppingItem](shoppingListFile)
+		items, err := readItems[ShoppingItem](shoppingListFile)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -63,7 +69,7 @@ func ShoppingListHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		var items []ShoppingItem
 		json.NewDecoder(r.Body).Decode(&items)
-		if err := saveItems(shoppingListFile, items); err != nil {
+		if err := writeFile(shoppingListFile, items); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -75,6 +81,9 @@ func ShoppingListHandler(w http.ResponseWriter, r *http.Request) {
 // added. Items already on the list are skipped so another module can push the
 // same request twice without creating duplicates.
 func AppendItems(items []ShoppingItem) (int, error) {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+
 	list, err := loadItems[ShoppingItem](shoppingListFile)
 	if err != nil {
 		return 0, err
@@ -100,6 +109,18 @@ func AppendItems(items []ShoppingItem) (int, error) {
 		return 0, nil
 	}
 	return added, saveItems(shoppingListFile, list)
+}
+
+func readItems[T any](filePath string) ([]T, error) {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+	return loadItems[T](filePath)
+}
+
+func writeFile[T any](filePath string, items []T) error {
+	fileMutex.Lock()
+	defer fileMutex.Unlock()
+	return saveItems(filePath, items)
 }
 
 func loadItems[T any](filePath string) ([]T, error) {

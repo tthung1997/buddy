@@ -54,6 +54,14 @@ func (r *LocalIngredientRepository) CreateOrUpdate(ingredient cooking.Ingredient
 	return r.store.put(ingredient.Id, ingredient)
 }
 
+func (r *LocalIngredientRepository) ReplaceAll(ingredients []cooking.Ingredient) error {
+	items := make(map[string]cooking.Ingredient, len(ingredients))
+	for _, ingredient := range ingredients {
+		items[ingredient.Id] = ingredient
+	}
+	return r.store.replaceAll(items)
+}
+
 func (r *LocalIngredientRepository) Delete(id string) error {
 	return r.store.remove(id)
 }
