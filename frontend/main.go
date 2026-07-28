@@ -6,15 +6,21 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	appCooking "github.com/tthung1997/buddy/app/cooking"
+	cookingRepository "github.com/tthung1997/buddy/app/cooking/repository"
 	appRandom "github.com/tthung1997/buddy/app/random"
 	"github.com/tthung1997/buddy/core/bgg"
 	coreRandom "github.com/tthung1997/buddy/core/random"
 	"github.com/tthung1997/buddy/frontend/boardgames"
+	"github.com/tthung1997/buddy/frontend/cooking"
 	"github.com/tthung1997/buddy/frontend/home"
 	"github.com/tthung1997/buddy/frontend/shopping"
 )
 
 var bggClient *bgg.Client
+var cookingController *cooking.CookingController
+
+const cookingDbDir = "frontend/cooking/.db"
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -30,6 +36,26 @@ func init() {
 		MaxRetries:          10,
 		RetryDelayInSeconds: 5,
 	})
+
+	recipes, err := cookingRepository.NewLocalRecipeRepository(cookingDbDir + "/recipes.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	ingredients, err := cookingRepository.NewLocalIngredientRepository(cookingDbDir + "/ingredients.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pantry, err := cookingRepository.NewLocalPantryRepository(cookingDbDir + "/pantry.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	cookingController = cooking.NewCookingController(
+		recipes,
+		ingredients,
+		pantry,
+		appCooking.NewPantryCookEngine(appCooking.NewSimpleUnitConverter()),
+		randomizer,
+	)
 }
 var randomizer coreRandom.IRandomizer = appRandom.NewSimpleRandomizer()
 
@@ -64,6 +90,22 @@ func main() {
 	http.HandleFunc("/shopping", logging(shopping.Index))
 	http.HandleFunc("/shopping/inventory", logging(shopping.InventoryHandler))
 	http.HandleFunc("/shopping/list", logging(shopping.ShoppingListHandler))
+
+	// cooking
+	http.HandleFunc("/cooking", logging(cookingController.Index))
+	http.HandleFunc("/cooking/recipes", logging(cookingController.Recipes))
+	http.HandleFunc("/cooking/recipes/view", logging(cookingController.Recipe))
+	http.HandleFunc("/cooking/recipes/edit", logging(cookingController.Edit))
+	http.HandleFunc("/cooking/recipes/save", logging(cookingController.SaveRecipe))
+	http.HandleFunc("/cooking/recipes/delete", logging(cookingController.DeleteRecipe))
+	http.HandleFunc("/cooking/pantry", logging(cookingController.PantryPage))
+	http.HandleFunc("/cooking/api/ingredients", logging(cookingController.IngredientsAPI))
+	http.HandleFunc("/cooking/api/pantry", logging(cookingController.PantryAPI))
+	// what can I cook right now
+	http.HandleFunc("/cooking/cook", logging(cookingController.Cook))
+	http.HandleFunc("/cooking/cook/pick", logging(cookingController.Pick))
+	http.HandleFunc("/cooking/cook/complete", logging(cookingController.Complete))
+	http.HandleFunc("/cooking/shopping/push", logging(cookingController.PushToShopping))
 
 	log.Println("Listening on port 2210")
 	err := http.ListenAndServe(":2210", nil)

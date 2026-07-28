@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>{{if .IsNew}}New recipe{{else}}Edit {{.RecipeName}}{{end}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking">Overview</a>
+          <a href="/cooking/cook">Cook now</a>
+          <a href="/cooking/recipes" aria-current="page">Recipes</a>
+          <a href="/cooking/pantry">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        <div class="cooking-feedback" id="feedback" role="status" hidden></div>
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="editor-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">Editor</span>
+            <h1 id="editor-title">{{if .IsNew}}New recipe{{else}}Edit {{.RecipeName}}{{end}}</h1>
+            <p>Ingredients are matched by name. A name Buddy has not seen before is added to the catalog automatically with the unit you pick here.</p>
+            <div class="cluster">
+              <button type="button" class="button-link" id="save-recipe">Save recipe</button>
+              <a href="/cooking/recipes" class="btn btn-text">Back to library</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Basics</span>
+              <h2>Recipe details</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="recipe-name">Name</label>
+                <input class="form-input" type="text" id="recipe-name" placeholder="Weeknight pancakes" required>
+              </div>
+              <div class="form-field">
+                <label for="recipe-servings">Servings</label>
+                <input class="form-input" type="number" id="recipe-servings" min="1" step="1" value="2">
+              </div>
+              <div class="form-field">
+                <label for="recipe-tags">Tags</label>
+                <input class="form-input" type="text" id="recipe-tags" placeholder="breakfast, quick">
+              </div>
+              <div class="form-field">
+                <label for="recipe-rating">Rating (0-5)</label>
+                <input class="form-input" type="number" id="recipe-rating" min="0" max="5" step="1" value="0">
+              </div>
+              <div class="form-field">
+                <label for="recipe-image">Image URL</label>
+                <input class="form-input" type="url" id="recipe-image" placeholder="https://">
+              </div>
+              <div class="form-field">
+                <label for="recipe-description">Description</label>
+                <input class="form-input" type="text" id="recipe-description" placeholder="Fluffy, ready in half an hour">
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="recipe-notes">Notes</label>
+              <textarea class="form-input" id="recipe-notes" rows="3" placeholder="Rest the batter for softer pancakes"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Ingredients</span>
+              <h2>What the recipe needs</h2>
+              <p>These amounts are for the serving count above and are what the pantry gets matched against.</p>
+            </div>
+            <button type="button" class="btn btn-tonal" id="add-ingredient">Add ingredient</button>
+          </div>
+          <div class="card-body">
+            <div class="stack" id="ingredient-rows"></div>
+            <div class="cooking-empty" id="ingredient-empty" hidden>No ingredients yet.</div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Method</span>
+              <h2>Steps</h2>
+              <p>Steps keep their own timing, and can list the ingredients they use.</p>
+            </div>
+            <button type="button" class="btn btn-tonal" id="add-step">Add step</button>
+          </div>
+          <div class="card-body">
+            <div class="stack" id="step-rows"></div>
+            <div class="cooking-empty" id="step-empty" hidden>No steps yet.</div>
+          </div>
+        </section>
+
+        <div class="cooking-inline-actions">
+          <button type="button" class="btn btn-filled" id="save-recipe-bottom">Save recipe</button>
+          <a href="/cooking/recipes" class="btn btn-text">Cancel</a>
+        </div>
+
+        <datalist id="ingredient-names"></datalist>
+      </main>
+    </div>
+
+    <script>
+      const RECIPE = JSON.parse({{.RecipeJSON}});
+      const CATALOG = JSON.parse({{.CatalogJSON}});
+      const UNITS = JSON.parse({{.UnitsJSON}});
+      const DURATION_UNITS = JSON.parse({{.DurationsJSON}});
+
+      const ingredients = (RECIPE.ingredients || []).map(clone);
+      const steps = (RECIPE.steps || []).map(step => ({
+        description: step.description || '',
+        duration: step.duration || 0,
+        durationUnit: step.durationUnit || 'minute',
+        ingredients: (step.ingredients || []).map(clone)
+      }));
+
+      function clone(ingredient) {
+        return {
+          ingredientId: ingredient.ingredientId || '',
+          amount: ingredient.amount || 0,
+          unit: ingredient.unit || UNITS[0],
+          optional: !!ingredient.optional,
+          note: ingredient.note || ''
+        };
+      }
+
+      function notify(message, isError) {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = message;
+        feedback.className = 'cooking-feedback ' + (isError ? 'error' : 'success');
+        feedback.hidden = !message;
+        if (isError) {
+          feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+
+      function select(options, value, onChange) {
+        const element = document.createElement('select');
+        element.className = 'form-input';
+        for (const option of options) {
+          const choice = document.createElement('option');
+          choice.value = option;
+          choice.textContent = option;
+          if (option === value) {
+            choice.selected = true;
+          }
+          element.appendChild(choice);
+        }
+        element.addEventListener('change', () => onChange(element.value));
+        return element;
+      }
+
+      function input(type, value, placeholder, onChange) {
+        const element = document.createElement('input');
+        element.className = 'form-input';
+        element.type = type;
+        element.placeholder = placeholder || '';
+        if (type === 'number') {
+          element.min = '0';
+          element.step = 'any';
+        }
+        if (type === 'text' && placeholder === 'Ingredient') {
+          element.setAttribute('list', 'ingredient-names');
+        }
+        element.value = value === undefined || value === null ? '' : value;
+        element.addEventListener('input', () => onChange(element.value));
+        return element;
+      }
+
+      function removeButton(label, onClick) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-text btn-danger small-table-btn';
+        button.textContent = label;
+        button.addEventListener('click', onClick);
+        return button;
+      }
+
+      function ingredientRow(list, index, onRender) {
+        const item = list[index];
+        const row = document.createElement('div');
+        row.className = 'cooking-editor-row';
+
+        row.appendChild(input('text', item.ingredientId, 'Ingredient', value => { item.ingredientId = value; }));
+        row.appendChild(input('number', item.amount, 'Amount', value => { item.amount = parseFloat(value) || 0; }));
+        row.appendChild(select(UNITS, item.unit, value => { item.unit = value; }));
+
+        const optional = document.createElement('label');
+        optional.className = 'filter-checkbox';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = item.optional;
+        checkbox.addEventListener('change', () => { item.optional = checkbox.checked; });
+        optional.appendChild(checkbox);
+        optional.appendChild(document.createTextNode(' Optional'));
+        row.appendChild(optional);
+
+        row.appendChild(removeButton('Remove', () => {
+          list.splice(index, 1);
+          onRender();
+        }));
+
+        return row;
+      }
+
+      function renderIngredients() {
+        const container = document.getElementById('ingredient-rows');
+        container.innerHTML = '';
+        ingredients.forEach((_, index) => container.appendChild(ingredientRow(ingredients, index, renderIngredients)));
+        document.getElementById('ingredient-empty').hidden = ingredients.length > 0;
+      }
+
+      function renderSteps() {
+        const container = document.getElementById('step-rows');
+        container.innerHTML = '';
+
+        steps.forEach((step, index) => {
+          const block = document.createElement('section');
+          block.className = 'cooking-step-editor';
+
+          const heading = document.createElement('div');
+          heading.className = 'cooking-inline-actions';
+          const title = document.createElement('strong');
+          title.textContent = 'Step ' + (index + 1);
+          heading.appendChild(title);
+
+          if (index > 0) {
+            const up = document.createElement('button');
+            up.type = 'button';
+            up.className = 'btn btn-text small-table-btn';
+            up.textContent = 'Move up';
+            up.addEventListener('click', () => {
+              steps.splice(index - 1, 0, steps.splice(index, 1)[0]);
+              renderSteps();
+            });
+            heading.appendChild(up);
+          }
+          heading.appendChild(removeButton('Remove step', () => {
+            steps.splice(index, 1);
+            renderSteps();
+          }));
+          block.appendChild(heading);
+
+          const description = document.createElement('textarea');
+          description.className = 'form-input';
+          description.rows = 2;
+          description.placeholder = 'Whisk the dry ingredients together';
+          description.value = step.description;
+          description.addEventListener('input', () => { step.description = description.value; });
+          block.appendChild(description);
+
+          const timing = document.createElement('div');
+          timing.className = 'cooking-inline-actions';
+          timing.appendChild(input('number', step.duration, 'Duration', value => { step.duration = parseFloat(value) || 0; }));
+          timing.appendChild(select(DURATION_UNITS, step.durationUnit, value => { step.durationUnit = value; }));
+
+          const addIngredient = document.createElement('button');
+          addIngredient.type = 'button';
+          addIngredient.className = 'btn btn-text small-table-btn';
+          addIngredient.textContent = 'Add ingredient to step';
+          addIngredient.addEventListener('click', () => {
+            step.ingredients.push(clone({}));
+            renderSteps();
+          });
+          timing.appendChild(addIngredient);
+          block.appendChild(timing);
+
+          step.ingredients.forEach((_, position) => {
+            block.appendChild(ingredientRow(step.ingredients, position, renderSteps));
+          });
+
+          container.appendChild(block);
+        });
+
+        document.getElementById('step-empty').hidden = steps.length > 0;
+      }
+
+      function renderCatalog() {
+        const list = document.getElementById('ingredient-names');
+        list.innerHTML = '';
+        for (const ingredient of CATALOG) {
+          const option = document.createElement('option');
+          option.value = ingredient.name;
+          list.appendChild(option);
+        }
+      }
+
+      async function save() {
+        const name = document.getElementById('recipe-name').value.trim();
+        if (!name) {
+          notify('The recipe needs a name', true);
+          return;
+        }
+
+        const payload = Object.assign({}, RECIPE, {
+          name: name,
+          description: document.getElementById('recipe-description').value.trim(),
+          imageUrl: document.getElementById('recipe-image').value.trim(),
+          servings: parseInt(document.getElementById('recipe-servings').value, 10) || 1,
+          rating: parseInt(document.getElementById('recipe-rating').value, 10) || 0,
+          notes: document.getElementById('recipe-notes').value.trim(),
+          tags: document.getElementById('recipe-tags').value.split(',').map(tag => tag.trim()).filter(Boolean),
+          ingredients: ingredients.filter(item => item.ingredientId.trim() !== ''),
+          steps: steps.map((step, index) => ({
+            order: index + 1,
+            description: step.description,
+            duration: step.duration,
+            durationUnit: step.durationUnit,
+            ingredients: step.ingredients.filter(item => item.ingredientId.trim() !== '')
+          }))
+        });
+
+        const response = await fetch('/cooking/recipes/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          notify(result.error || 'Could not save the recipe', true);
+          return;
+        }
+
+        window.location.href = '/cooking/recipes/view?id=' + encodeURIComponent(result.id) + '&success=' + encodeURIComponent('Recipe saved');
+      }
+
+      document.getElementById('add-ingredient').addEventListener('click', () => {
+        ingredients.push(clone({}));
+        renderIngredients();
+      });
+
+      document.getElementById('add-step').addEventListener('click', () => {
+        steps.push({ description: '', duration: 0, durationUnit: 'minute', ingredients: [] });
+        renderSteps();
+      });
+
+      document.getElementById('save-recipe').addEventListener('click', save);
+      document.getElementById('save-recipe-bottom').addEventListener('click', save);
+
+      document.getElementById('recipe-name').value = RECIPE.name || '';
+      document.getElementById('recipe-description').value = RECIPE.description || '';
+      document.getElementById('recipe-image').value = RECIPE.imageUrl || '';
+      document.getElementById('recipe-servings').value = RECIPE.servings || 2;
+      document.getElementById('recipe-rating').value = RECIPE.rating || 0;
+      document.getElementById('recipe-notes').value = RECIPE.notes || '';
+      document.getElementById('recipe-tags').value = (RECIPE.tags || []).join(', ');
+
+      renderCatalog();
+      renderIngredients();
+      renderSteps();
+    </script>
+  </body>
+</html>

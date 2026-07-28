@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>Pantry</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking">Overview</a>
+          <a href="/cooking/cook">Cook now</a>
+          <a href="/cooking/recipes">Recipes</a>
+          <a href="/cooking/pantry" aria-current="page">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        <div class="cooking-feedback" id="feedback" role="status" hidden></div>
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="pantry-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">On hand</span>
+            <h1 id="pantry-title">Pantry</h1>
+            <p>Amounts here are what Buddy matches recipes against. Ingredients are shared with the catalog below, so a name typed once keeps its unit everywhere.</p>
+            <div class="cluster">
+              <a href="/cooking/cook" class="button-link">What can I cook?</a>
+            </div>
+          </div>
+          <div class="cooking-stat-grid" aria-label="Pantry totals">
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Pantry entries</span>
+              <strong id="pantry-count">0</strong>
+              <span class="cooking-stat-help">Ingredients with an amount on hand.</span>
+            </div>
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Catalog</span>
+              <strong id="catalog-count">0</strong>
+              <span class="cooking-stat-help">Known ingredients and their default units.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Stock</span>
+              <h2>What is in the kitchen</h2>
+              <p>Add an ingredient with the amount you have. Editing a row updates the match on the cook page.</p>
+            </div>
+            <span class="badge" id="pantry-badge">0 items</span>
+          </div>
+          <div class="card-body">
+            <form class="cooking-toolbar" id="add-pantry-form">
+              <div class="form-field">
+                <label for="pantry-name">Ingredient</label>
+                <input class="form-input" type="text" id="pantry-name" list="ingredient-names" placeholder="Flour" required>
+              </div>
+              <div class="form-field">
+                <label for="pantry-amount">Amount</label>
+                <input class="form-input" type="number" id="pantry-amount" min="0" step="any" value="1" required>
+              </div>
+              <div class="form-field">
+                <label for="pantry-unit">Unit</label>
+                <select class="form-input" id="pantry-unit">
+                  {{range .Units}}<option value="{{.}}">{{.}}</option>{{end}}
+                </select>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-filled">Add to pantry</button>
+              </div>
+            </form>
+
+            <div class="table-responsive table-shell">
+              <table id="pantry-table">
+                <thead>
+                  <tr>
+                    <th>Ingredient</th>
+                    <th>Amount</th>
+                    <th>Unit</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <div class="cooking-empty" id="pantry-empty" hidden>The pantry is empty. Add what you have on hand to see recipe matches.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Catalog</span>
+              <h2>Known ingredients</h2>
+              <p>Ingredients are created automatically when a recipe or pantry entry mentions them. Give them a category or an image to make lists easier to scan.</p>
+            </div>
+            <span class="badge" id="catalog-badge">0 items</span>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive table-shell">
+              <table id="catalog-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Default unit</th>
+                    <th>Image URL</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <div class="cooking-empty" id="catalog-empty" hidden>No ingredients yet. They appear here as soon as a recipe or the pantry mentions one.</div>
+            </div>
+          </div>
+        </section>
+
+        <datalist id="ingredient-names">
+          {{range .IngredientIds}}<option value="{{.}}"></option>{{end}}
+        </datalist>
+      </main>
+    </div>
+
+    <script>
+      const UNITS = [{{range $index, $unit := .Units}}{{if $index}}, {{end}}"{{$unit}}"{{end}}];
+
+      let pantry = [];
+      let catalog = [];
+
+      function notify(message, isError) {
+        const feedback = document.getElementById('feedback');
+        feedback.textContent = message;
+        feedback.className = 'cooking-feedback ' + (isError ? 'error' : 'success');
+        feedback.hidden = !message;
+      }
+
+      function unitSelect(value, onChange) {
+        const select = document.createElement('select');
+        select.className = 'form-input';
+        for (const unit of UNITS) {
+          const option = document.createElement('option');
+          option.value = unit;
+          option.textContent = unit;
+          if (unit === value) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        }
+        select.addEventListener('change', () => onChange(select.value));
+        return select;
+      }
+
+      function textInput(value, type, onChange) {
+        const input = document.createElement('input');
+        input.className = 'form-input';
+        input.type = type;
+        if (type === 'number') {
+          input.min = '0';
+          input.step = 'any';
+        }
+        input.value = value === undefined || value === null ? '' : value;
+        input.addEventListener('change', () => onChange(input.value));
+        return input;
+      }
+
+      function cell(row, content) {
+        const td = document.createElement('td');
+        if (typeof content === 'string') {
+          td.textContent = content;
+        } else {
+          td.appendChild(content);
+        }
+        row.appendChild(td);
+        return td;
+      }
+
+      async function loadPantry() {
+        const response = await fetch('/cooking/api/pantry');
+        pantry = response.ok ? await response.json() : [];
+        renderPantry();
+      }
+
+      async function savePantry() {
+        const response = await fetch('/cooking/api/pantry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pantry)
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          notify(payload.error || 'Could not save the pantry', true);
+          return false;
+        }
+        notify('Pantry saved', false);
+        await loadPantry();
+        return true;
+      }
+
+      function renderPantry() {
+        const body = document.querySelector('#pantry-table tbody');
+        body.innerHTML = '';
+
+        pantry.forEach((item, position) => {
+          const row = document.createElement('tr');
+          cell(row, textInput(item.name || item.ingredientId, 'text', value => { item.name = value; savePantry(); }));
+          cell(row, textInput(item.amount, 'number', value => { item.amount = parseFloat(value) || 0; savePantry(); }));
+          cell(row, unitSelect(item.unit, value => { item.unit = value; savePantry(); }));
+
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'btn btn-text btn-danger small-table-btn';
+          remove.textContent = 'Remove';
+          remove.addEventListener('click', () => {
+            pantry.splice(position, 1);
+            savePantry();
+          });
+          cell(row, remove);
+
+          body.appendChild(row);
+        });
+
+        document.getElementById('pantry-empty').hidden = pantry.length > 0;
+        document.getElementById('pantry-count').textContent = pantry.length;
+        document.getElementById('pantry-badge').textContent = pantry.length + ' items';
+      }
+
+      async function loadCatalog() {
+        const response = await fetch('/cooking/api/ingredients');
+        catalog = response.ok ? await response.json() : [];
+        renderCatalog();
+      }
+
+      async function saveCatalog() {
+        const response = await fetch('/cooking/api/ingredients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(catalog)
+        });
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          notify(payload.error || 'Could not save the catalog', true);
+          return;
+        }
+        notify('Catalog saved', false);
+        await loadCatalog();
+        await loadPantry();
+      }
+
+      function renderCatalog() {
+        const body = document.querySelector('#catalog-table tbody');
+        body.innerHTML = '';
+
+        catalog.forEach((ingredient, position) => {
+          const row = document.createElement('tr');
+          cell(row, textInput(ingredient.name, 'text', value => { ingredient.name = value; saveCatalog(); }));
+          cell(row, textInput(ingredient.category, 'text', value => { ingredient.category = value; saveCatalog(); }));
+          cell(row, unitSelect(ingredient.defaultUnit, value => { ingredient.defaultUnit = value; saveCatalog(); }));
+          cell(row, textInput(ingredient.imageUrl, 'url', value => { ingredient.imageUrl = value; saveCatalog(); }));
+
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'btn btn-text btn-danger small-table-btn';
+          remove.textContent = 'Remove';
+          remove.addEventListener('click', () => {
+            catalog.splice(position, 1);
+            saveCatalog();
+          });
+          cell(row, remove);
+
+          body.appendChild(row);
+        });
+
+        document.getElementById('catalog-empty').hidden = catalog.length > 0;
+        document.getElementById('catalog-count').textContent = catalog.length;
+        document.getElementById('catalog-badge').textContent = catalog.length + ' items';
+      }
+
+      document.getElementById('pantry-name').addEventListener('change', () => {
+        const name = document.getElementById('pantry-name').value.trim().toLowerCase();
+        const known = catalog.find(ingredient => (ingredient.name || '').toLowerCase() === name);
+        if (known && known.defaultUnit) {
+          document.getElementById('pantry-unit').value = known.defaultUnit;
+        }
+      });
+
+      document.getElementById('add-pantry-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const name = document.getElementById('pantry-name').value.trim();
+        if (!name) {
+          return;
+        }
+
+        const amount = parseFloat(document.getElementById('pantry-amount').value) || 0;
+        const unit = document.getElementById('pantry-unit').value;
+        const existing = pantry.find(item => (item.name || '').toLowerCase() === name.toLowerCase());
+
+        if (existing) {
+          existing.amount = amount;
+          existing.unit = unit;
+        } else {
+          pantry.push({ ingredientId: '', name: name, amount: amount, unit: unit });
+        }
+
+        if (await savePantry()) {
+          document.getElementById('pantry-name').value = '';
+          document.getElementById('pantry-amount').value = '1';
+          await loadCatalog();
+        }
+      });
+
+      loadPantry();
+      loadCatalog();
+    </script>
+  </body>
+</html>

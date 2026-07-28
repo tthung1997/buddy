@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>Recipes</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking">Overview</a>
+          <a href="/cooking/cook">Cook now</a>
+          <a href="/cooking/recipes" aria-current="page">Recipes</a>
+          <a href="/cooking/pantry">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        {{if .Success}}<div class="cooking-feedback success" role="status">{{.Success}}</div>{{end}}
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="recipes-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">Library</span>
+            <h1 id="recipes-title">Recipes</h1>
+            <p>Every recipe keeps its ingredients, ordered steps, and timings together, so a recipe can be scaled, matched against the pantry, and cooked without leaving Buddy.</p>
+            <div class="cluster">
+              <a href="/cooking/recipes/edit" class="button-link">Add a recipe</a>
+              <a href="/cooking/cook" class="btn btn-tonal">What can I cook?</a>
+            </div>
+          </div>
+          <div class="cooking-stat-grid" aria-label="Library totals">
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Shown</span>
+              <strong>{{.Count}}</strong>
+              <span class="cooking-stat-help">Matching the current filters.</span>
+            </div>
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Saved</span>
+              <strong>{{.Total}}</strong>
+              <span class="cooking-stat-help">Recipes in the library.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Find</span>
+              <h2>Search the library</h2>
+              <p>Search names, descriptions, and tags, or narrow the list to a single tag.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <form class="cooking-toolbar" method="get" action="/cooking/recipes">
+              <div class="form-field">
+                <label for="q">Search</label>
+                <input class="form-input" type="search" id="q" name="q" value="{{.Query}}" placeholder="Pancakes, weeknight, soup">
+              </div>
+              <div class="form-field">
+                <label for="tag">Tag</label>
+                <select class="form-input" id="tag" name="tag">
+                  <option value="">All tags</option>
+                  {{range .Tags}}
+                  <option value="{{.}}" {{if eq . $.Tag}}selected{{end}}>{{.}}</option>
+                  {{end}}
+                </select>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-filled">Filter</button>
+                <a href="/cooking/recipes" class="btn btn-text">Clear</a>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Collection</span>
+              <h2>All recipes</h2>
+              <p>Open a recipe to scale it, check it against the pantry, and cook it.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            {{if .Recipes}}
+            <div class="cooking-recipe-grid">
+              {{range .Recipes}}
+              <article class="cooking-recipe-card">
+                <h3><a href="/cooking/recipes/view?id={{.Id}}">{{.Name}}</a></h3>
+                {{if .Description}}<p class="text-muted">{{.Description}}</p>{{end}}
+                <span class="cooking-coverage-label">{{.Servings}} serving(s) &middot; {{.IngredientCount}} ingredient(s) &middot; {{.StepCount}} step(s){{if .TotalDurationLabel}} &middot; {{.TotalDurationLabel}}{{end}}</span>
+                {{if .Tags}}
+                <div class="chip-row">
+                  {{range .Tags}}<span class="chip">{{.}}</span>{{end}}
+                </div>
+                {{end}}
+                {{if .LastCookedLabel}}<span class="cooking-coverage-label">Last cooked {{.LastCookedLabel}}</span>{{end}}
+                <div class="cooking-inline-actions">
+                  <a href="/cooking/recipes/view?id={{.Id}}" class="btn btn-tonal">Open</a>
+                  <a href="/cooking/recipes/edit?id={{.Id}}" class="btn btn-text">Edit</a>
+                  <form method="post" action="/cooking/recipes/delete" onsubmit="return confirm('Delete {{.Name}}?');">
+                    <input type="hidden" name="id" value="{{.Id}}">
+                    <button type="submit" class="btn btn-text btn-danger">Delete</button>
+                  </form>
+                </div>
+              </article>
+              {{end}}
+            </div>
+            {{else}}
+            <div class="cooking-empty">No recipes match yet. <a href="/cooking/recipes/edit">Add one</a> to get started.</div>
+            {{end}}
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

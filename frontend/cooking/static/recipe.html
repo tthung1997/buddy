@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>{{.Recipe.Name}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking">Overview</a>
+          <a href="/cooking/cook">Cook now</a>
+          <a href="/cooking/recipes" aria-current="page">Recipes</a>
+          <a href="/cooking/pantry">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        {{if .Success}}<div class="cooking-feedback success" role="status">{{.Success}}</div>{{end}}
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="recipe-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">Recipe</span>
+            <h1 id="recipe-title">{{.Recipe.Name}}</h1>
+            {{if .Recipe.Description}}<p>{{.Recipe.Description}}</p>{{end}}
+            <span class="cooking-coverage-label">{{.Servings}} serving(s) &middot; {{.Recipe.IngredientCount}} ingredient(s) &middot; {{.Recipe.StepCount}} step(s){{if .Recipe.TotalDurationLabel}} &middot; {{.Recipe.TotalDurationLabel}}{{end}}{{if .Recipe.LastCookedLabel}} &middot; last cooked {{.Recipe.LastCookedLabel}}{{end}}</span>
+            {{if .Recipe.Tags}}
+            <div class="chip-row">
+              {{range .Recipe.Tags}}<span class="chip">{{.}}</span>{{end}}
+            </div>
+            {{end}}
+            <div class="cooking-inline-actions">
+              {{if and .HasMatch .Match.Cookable}}
+              <form method="post" action="/cooking/cook/complete">
+                <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                <input type="hidden" name="servings" value="{{.Servings}}">
+                <button type="submit" class="btn btn-filled">Cooked it</button>
+              </form>
+              {{end}}
+              {{if and .HasMatch .Match.Missing}}
+              <form method="post" action="/cooking/shopping/push">
+                <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                <input type="hidden" name="servings" value="{{.Servings}}">
+                <button type="submit" class="btn btn-tonal">Add missing to shopping</button>
+              </form>
+              {{end}}
+              <a href="/cooking/recipes/edit?id={{.Recipe.Id}}" class="btn btn-text">Edit</a>
+              <form method="post" action="/cooking/recipes/delete" onsubmit="return confirm('Delete {{.Recipe.Name}}?');">
+                <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                <button type="submit" class="btn btn-text btn-danger">Delete</button>
+              </form>
+            </div>
+          </div>
+
+          <div class="cooking-stat-grid" aria-label="Recipe status">
+            {{if .HasMatch}}
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Pantry match</span>
+              <strong>{{.Match.CoveragePercent}}%</strong>
+              <span class="cooking-stat-help">{{.Match.StatusLabel}}</span>
+            </div>
+            {{end}}
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Scale</span>
+              <form method="get" action="/cooking/recipes/view" class="cooking-inline-actions">
+                <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                <input class="form-input" type="number" name="servings" min="1" step="1" value="{{.Servings}}" aria-label="Servings">
+                <button type="submit" class="btn btn-tonal">Rescale</button>
+              </form>
+              <span class="cooking-stat-help">Amounts below follow this serving count.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Ingredients</span>
+              <h2>What you need</h2>
+              <p>Scaled to {{.Servings}} serving(s) and checked against the pantry.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            {{if .Recipe.Ingredients}}
+            <ul class="cooking-line-list">
+              {{range .Recipe.Ingredients}}
+              <li class="cooking-line">
+                <span>{{.Name}}{{if .Optional}} <span class="text-muted">(optional)</span>{{end}}{{if .Note}} <span class="text-muted">&middot; {{.Note}}</span>{{end}}</span>
+                <span class="cooking-line-amount">{{.AmountLabel}} {{.Unit}}</span>
+              </li>
+              {{end}}
+            </ul>
+            {{else}}
+            <div class="cooking-empty">This recipe has no ingredients yet. <a href="/cooking/recipes/edit?id={{.Recipe.Id}}">Add some</a>.</div>
+            {{end}}
+
+            {{if and .HasMatch .Match.Missing}}
+            <h3 class="cooking-subheading">Missing from the pantry</h3>
+            <ul class="cooking-line-list">
+              {{range .Match.Missing}}
+              <li class="cooking-line cooking-line-missing">
+                <span>{{.Name}}{{if .Optional}} <span class="text-muted">(optional)</span>{{end}}</span>
+                <span class="cooking-line-amount">{{.AmountLabel}} {{.Unit}} &middot; {{.ReasonLabel}}</span>
+              </li>
+              {{end}}
+            </ul>
+            {{end}}
+          </div>
+        </section>
+
+        {{if .Recipe.Steps}}
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Method</span>
+              <h2>Steps</h2>
+              <p>Each step lists what it uses and how long it takes.</p>
+            </div>
+            {{if .Recipe.TotalDurationLabel}}<span class="badge">{{.Recipe.TotalDurationLabel}} total</span>{{end}}
+          </div>
+          <div class="card-body">
+            <ol class="cooking-steps">
+              {{range .Recipe.Steps}}
+              <li class="cooking-step">
+                <span class="cooking-step-index" aria-hidden="true">{{.Order}}</span>
+                <div class="cooking-step-body">
+                  <p>{{.Description}}</p>
+                  {{if .DurationLabel}}<span class="cooking-step-meta">{{.DurationLabel}}</span>{{end}}
+                  {{if .Ingredients}}
+                  <span class="cooking-step-meta">
+                    Uses:
+                    {{range $i, $ingredient := .Ingredients}}{{if $i}}, {{end}}{{$ingredient.AmountLabel}} {{$ingredient.Unit}} {{$ingredient.Name}}{{end}}
+                  </span>
+                  {{end}}
+                </div>
+              </li>
+              {{end}}
+            </ol>
+          </div>
+        </section>
+        {{end}}
+
+        {{if .Recipe.Notes}}
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Notes</span>
+              <h2>Kitchen notes</h2>
+            </div>
+          </div>
+          <div class="card-body">
+            <p>{{.Recipe.Notes}}</p>
+          </div>
+        </section>
+        {{end}}
+      </main>
+    </div>
+  </body>
+</html>

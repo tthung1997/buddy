@@ -7,6 +7,7 @@ Buddy is a Go project that represents a friend who can help you with your day-to
 
 - Create a list of choices and then randomly select one of the choices based on their weights.
 - Construct a ranking for a list of items
+- Keep a recipe library and a pantry, then answer what can be cooked right now
 
 ## Project Structure
 
@@ -17,6 +18,24 @@ The project is structured into several packages:
 - `core`: Contains the core business logic and interfaces.
 - `framework`: Contains the gRPC service definitions and generated code.
 - `frontend`: Contains the main entry point for the frontend service.
+
+## Modules
+
+The frontend serves the following modules:
+
+- **Board Games** (`/boardgames`): browse a BoardGameGeek collection, pick something to play, and track backed or preordered games.
+- **Cooking** (`/cooking`): keep recipes with their ordered steps and timings, track pantry amounts, and let Buddy join the two to answer what can be cooked right now. Missing ingredients can be pushed straight to the shopping list.
+- **Shopping** (`/shopping`): keep the household inventory current and queue the next store run.
+
+### Cooking
+
+The cooking module is built from three layers:
+
+- `core/cooking`: units and their kinds, durations, ingredients, recipes with steps, pantry items, and the `ICookEngine` interface.
+- `app/cooking`: `SimpleUnitConverter` (conversion within a unit kind), `PantryCookEngine` (pantry to recipe matching, aggregated shopping lists, and pantry deduction), and JSON backed repositories.
+- `frontend/cooking`: the dashboard, recipe library and editor, pantry workspace, and the "what can I cook" view.
+
+Recipes, ingredients, and the pantry are stored as JSON under `frontend/cooking/.db/`, which is gitignored and created on first run.
 
 ## How to Run
 

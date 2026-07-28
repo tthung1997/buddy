@@ -144,6 +144,30 @@ func TestRecipe_RequiredIngredients_PrefersRecipeLevelList(t *testing.T) {
 	if len(required) != 4 {
 		t.Fatalf("expected 4 required ingredients, got %d", len(required))
 	}
+	for _, ingredient := range required {
+		if ingredient.IngredientId == "flour" && ingredient.Amount != 200 {
+			t.Errorf("expected the recipe level amount to win, got %v", ingredient.Amount)
+		}
+	}
+}
+
+func TestRecipe_RequiredIngredients_AddsStepOnlyIngredients(t *testing.T) {
+	recipe := pancakes()
+	recipe.Steps = append(recipe.Steps, cooking.Step{
+		Order:       4,
+		Description: "Fry in butter",
+		Ingredients: []cooking.RecipeIngredient{
+			{IngredientId: "butter", Amount: 20, Unit: cooking.Gram},
+		},
+	})
+
+	required := recipe.RequiredIngredients()
+	if len(required) != 5 {
+		t.Fatalf("expected the step only ingredient to be included, got %d", len(required))
+	}
+	if required[4].IngredientId != "butter" {
+		t.Errorf("expected butter to be appended, got %s", required[4].IngredientId)
+	}
 }
 
 func TestIngredient_Allows(t *testing.T) {

@@ -78,19 +78,26 @@ func (r Recipe) TotalDuration() (time.Duration, error) {
 	return total, nil
 }
 
-// RequiredIngredients returns the recipe level ingredients, falling back to the
-// ingredients declared on the steps when no recipe level list is present.
+// RequiredIngredients returns everything the recipe consumes. The recipe level
+// list is authoritative for the amounts, and any ingredient that only appears
+// inside a step is added on top of it so nothing goes unnoticed.
 func (r Recipe) RequiredIngredients() []RecipeIngredient {
-	if len(r.Ingredients) > 0 {
-		ingredients := make([]RecipeIngredient, len(r.Ingredients))
-		copy(ingredients, r.Ingredients)
-		return ingredients
+	ingredients := make([]RecipeIngredient, 0, len(r.Ingredients))
+	declared := make(map[string]bool, len(r.Ingredients))
+	for _, ingredient := range r.Ingredients {
+		ingredients = append(ingredients, ingredient)
+		declared[ingredient.IngredientId] = true
 	}
 
-	ingredients := []RecipeIngredient{}
 	for _, step := range r.OrderedSteps() {
-		ingredients = append(ingredients, step.Ingredients...)
+		for _, ingredient := range step.Ingredients {
+			if declared[ingredient.IngredientId] {
+				continue
+			}
+			ingredients = append(ingredients, ingredient)
+		}
 	}
+
 	return ingredients
 }
 
