@@ -1,0 +1,22 @@
+package cooking
+
+import (
+	"errors"
+	"time"
+)
+
+var ErrPantryItemNotFound = errors.New("pantry item not found")
+
+type PantryItem struct {
+	IngredientId    string    `json:"ingredientId"`
+	Amount          float64   `json:"amount"`
+	Unit            Unit      `json:"unit"`
+	UpdatedDateTime time.Time `json:"updatedDateTime"`
+}
+
+type IPantryRepository interface {
+	List() ([]PantryItem, error)
+	Get(ingredientId string) (PantryItem, error)
+	CreateOrUpdate(PantryItem) error
+	Delete(ingredientId string) error
+}
