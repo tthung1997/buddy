@@ -1939,3 +1939,444 @@ html:not([data-theme="dark"]) .bgg-logo-dark {
   cursor: default;
   pointer-events: none;
 }
+
+/* Cooking module */
+.icon-amber {
+  background: var(--color-warning-container);
+  color: var(--color-on-warning-container);
+}
+
+.cooking-page {
+  margin: 0;
+  padding: 0;
+  background: var(--color-surface-container);
+}
+
+.cooking-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cooking-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.cooking-subnav a {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-on-surface-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cooking-subnav a:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 34%, var(--color-outline-variant));
+  color: var(--color-primary);
+}
+
+.cooking-subnav a[aria-current="page"] {
+  border-color: color-mix(in srgb, var(--color-primary) 34%, var(--color-outline-variant));
+  background: var(--color-primary-container);
+  color: var(--color-primary);
+}
+
+.cooking-overview {
+  display: flex;
+  text-align: left;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 1.5rem;
+}
+
+.cooking-overview-copy {
+  flex: 1 1 32rem;
+}
+
+.cooking-overview-copy p {
+  max-width: 46rem;
+}
+
+.cooking-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  flex: 1 1 22rem;
+}
+
+.cooking-stat-card {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  padding: 1rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+a.cooking-stat-card:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-outline-variant));
+  background: color-mix(in srgb, var(--color-primary-container) 18%, var(--color-surface));
+}
+
+.cooking-stat-label {
+  color: var(--color-on-surface-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.cooking-stat-card strong {
+  font-size: 1.75rem;
+  line-height: 1.1;
+}
+
+.cooking-stat-help {
+  color: var(--color-on-surface-muted);
+  font-size: 0.82rem;
+}
+
+.cooking-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.cooking-toolbar .form-field {
+  flex: 0 1 14rem;
+  min-width: 10rem;
+}
+
+.cooking-toolbar .form-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cooking-match-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+  gap: 1rem;
+}
+
+.cooking-match-card {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  padding: 1.25rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.cooking-match-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cooking-match-head h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.cooking-match-head a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cooking-match-head a:hover {
+  color: var(--color-primary);
+}
+
+.cooking-status-ready {
+  background: var(--color-success-container);
+  color: var(--color-on-success-container);
+}
+
+.cooking-status-missing {
+  background: var(--color-warning-container);
+  color: var(--color-on-warning-container);
+}
+
+.cooking-coverage-bar {
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--color-surface-container-highest);
+  overflow: hidden;
+}
+
+.cooking-coverage-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-primary);
+}
+
+.cooking-coverage-label {
+  color: var(--color-on-surface-muted);
+  font-size: 0.8rem;
+}
+
+.cooking-line-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cooking-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed var(--color-outline-variant);
+  font-size: 0.9rem;
+}
+
+.cooking-line:last-child {
+  border-bottom: none;
+}
+
+.cooking-line-amount {
+  color: var(--color-on-surface-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.cooking-line-missing .cooking-line-amount {
+  color: var(--color-on-warning-container);
+}
+
+.cooking-steps {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: cooking-step;
+}
+
+.cooking-step {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.85rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+.cooking-step:last-child {
+  border-bottom: none;
+}
+
+.cooking-step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: var(--color-primary-container);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.cooking-step-body {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.cooking-step-meta {
+  color: var(--color-on-surface-muted);
+  font-size: 0.82rem;
+}
+
+.cooking-recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: 1rem;
+}
+
+.cooking-recipe-card {
+  display: grid;
+  gap: 0.6rem;
+  align-content: start;
+  padding: 1.25rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.cooking-recipe-card:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-outline-variant));
+  box-shadow: var(--shadow-sm);
+}
+
+.cooking-recipe-card h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.cooking-empty {
+  padding: 1.5rem;
+  border: 1px dashed var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  color: var(--color-on-surface-muted);
+  text-align: center;
+}
+
+.cooking-editor-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 2fr) minmax(4rem, 1fr) minmax(5rem, 1fr) auto auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.cooking-step-editor {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-container);
+}
+
+.cooking-inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Single button forms are wrappers, not panels: strip the global form chrome so
+   a submit button sits flush next to a plain link. */
+.cooking-inline-actions form,
+.cooking-stat-card form,
+form.cooking-toolbar,
+form.cooking-scale-form {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.cooking-inline-actions form > input:not([type="hidden"]),
+.cooking-inline-actions form > select,
+.cooking-inline-actions form > button,
+.cooking-stat-card form > select,
+.cooking-stat-card form > button,
+form.cooking-scale-form > button {
+  width: auto;
+}
+
+.cooking-inline-actions form {
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Destructive actions stay recognisable without shouting over the primary one. */
+.cooking-inline-actions .btn-text.btn-danger,
+.cooking-page .small-table-btn.btn-danger {
+  background: transparent;
+  color: var(--color-danger);
+}
+
+.cooking-inline-actions .btn-text.btn-danger:hover,
+.cooking-page .small-table-btn.btn-danger:hover {
+  background: var(--color-danger-container);
+  color: var(--color-on-danger-container);
+}
+
+.cooking-scale-form {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+form.cooking-scale-form > input[type="number"] {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  min-width: 0;
+}
+
+form.cooking-scale-form > button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.cooking-feedback {
+  margin-bottom: 1rem;
+}
+
+.cooking-hint {
+  margin: 0.75rem 0 0;
+  color: var(--color-on-surface-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* Amount and unit share one cell so the pantry table can swap the pair out for
+   a single stock selector when the ingredient is a staple. */
+.cooking-cell-group {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.cooking-cell-group .form-input {
+  width: auto;
+  min-width: 0;
+  flex: 1 1 4rem;
+}
+
+.cooking-stock-select {
+  width: auto;
+  min-width: 9rem;
+}
+
+.cooking-stock-select[data-stock="LOW"] {
+  border-color: color-mix(in srgb, var(--color-warning) 55%, var(--color-outline));
+  color: var(--color-on-warning-container);
+}
+
+.cooking-stock-select[data-stock="OUT"] {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-outline));
+  color: var(--color-danger);
+}
+
+@media (max-width: 720px) {
+  .cooking-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cooking-editor-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.cooking-subheading {
+  margin-top: 1.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+}

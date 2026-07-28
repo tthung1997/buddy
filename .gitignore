@@ -28,3 +28,6 @@ go.work
 
 # Documentation
 docs/
+
+# Tooling caches
+.impeccable/

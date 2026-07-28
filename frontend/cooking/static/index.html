@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>Cooking</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking" aria-current="page">Overview</a>
+          <a href="/cooking/cook">Cook now</a>
+          <a href="/cooking/recipes">Recipes</a>
+          <a href="/cooking/pantry">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        {{if .Success}}<div class="cooking-feedback success" role="status">{{.Success}}</div>{{end}}
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="cooking-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">Kitchen workspace</span>
+            <h1 id="cooking-title">Cooking assistant</h1>
+            <p>Keep recipes, their steps, and your pantry in one place. Buddy joins what you have against what each recipe needs, so the answer to "what can I cook right now" is always one click away.</p>
+            <div class="cluster">
+              <a href="/cooking/cook" class="button-link">What can I cook?</a>
+              <a href="/cooking/recipes/edit" class="btn btn-tonal">Add a recipe</a>
+            </div>
+          </div>
+          <div class="cooking-stat-grid" aria-label="Kitchen totals">
+            <a href="/cooking/cook" class="cooking-stat-card">
+              <span class="cooking-stat-label">Ready to cook</span>
+              <strong>{{.CookableCount}}</strong>
+              <span class="cooking-stat-help">Recipes the pantry fully covers.</span>
+            </a>
+            <a href="/cooking/recipes" class="cooking-stat-card">
+              <span class="cooking-stat-label">Recipes</span>
+              <strong>{{.RecipeCount}}</strong>
+              <span class="cooking-stat-help">Saved in the library.</span>
+            </a>
+            <a href="/cooking/pantry" class="cooking-stat-card">
+              <span class="cooking-stat-label">Pantry entries</span>
+              <strong>{{.PantryCount}}</strong>
+              <span class="cooking-stat-help">Ingredients with an amount on hand.</span>
+            </a>
+            <a href="/cooking/pantry" class="cooking-stat-card">
+              <span class="cooking-stat-label">Catalog</span>
+              <strong>{{.IngredientCount}}</strong>
+              <span class="cooking-stat-help">Known ingredients and their units.</span>
+            </a>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Best matches</span>
+              <h2>Closest to the table</h2>
+              <p>The recipes your pantry covers best right now, ranked by how much of each one you already have.</p>
+            </div>
+            <a href="/cooking/cook/pick" class="btn btn-tonal">Surprise me</a>
+          </div>
+          <div class="card-body">
+            {{if .Highlights}}
+            <div class="cooking-match-grid">
+              {{range .Highlights}}
+              <article class="cooking-match-card">
+                <div class="cooking-match-head">
+                  <h3><a href="/cooking/recipes/view?id={{.Recipe.Id}}">{{.Recipe.Name}}</a></h3>
+                  <span class="status-pill {{.StatusClass}}">{{.StatusLabel}}</span>
+                </div>
+                <div class="cooking-coverage-bar" role="img" aria-label="{{.CoveragePercent}}% of the ingredients on hand">
+                  <div class="cooking-coverage-fill" style="width: {{.CoveragePercent}}%"></div>
+                </div>
+                <span class="cooking-coverage-label">{{.CoveragePercent}}% of ingredients on hand &middot; {{.Servings}} serving(s){{if .Recipe.TotalDurationLabel}} &middot; {{.Recipe.TotalDurationLabel}}{{end}}</span>
+                {{if .Missing}}
+                <ul class="cooking-line-list">
+                  {{range .Missing}}
+                  <li class="cooking-line cooking-line-missing">
+                    <span>{{.Name}}{{if .Optional}} <span class="text-muted">(optional)</span>{{end}}</span>
+                    <span class="cooking-line-amount">{{if .NeedLabel}}{{.NeedLabel}} &middot; {{end}}{{.ReasonLabel}}</span>
+                  </li>
+                  {{end}}
+                </ul>
+                {{end}}
+              </article>
+              {{end}}
+            </div>
+            {{else}}
+            <div class="cooking-empty">No recipes yet. <a href="/cooking/recipes/edit">Add your first recipe</a> and stock the <a href="/cooking/pantry">pantry</a> to see matches here.</div>
+            {{end}}
+          </div>
+        </section>
+
+        {{if .NextUp}}
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Shopping</span>
+              <h2>Closest missing ingredients</h2>
+              <p>What stands between the pantry and the next recipe on the list.</p>
+            </div>
+            <a href="/shopping" class="btn btn-text">Open shopping</a>
+          </div>
+          <div class="card-body">
+            <ul class="cooking-line-list">
+              {{range .NextUp}}
+              <li class="cooking-line cooking-line-missing">
+                <span>{{.Name}}</span>
+                <span class="cooking-line-amount">{{if .NeedLabel}}{{.NeedLabel}} &middot; {{end}}{{.ReasonLabel}}</span>
+              </li>
+              {{end}}
+            </ul>
+          </div>
+        </section>
+        {{end}}
+      </main>
+    </div>
+  </body>
+</html>

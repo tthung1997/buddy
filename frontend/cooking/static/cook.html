@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <script src="/static/theme.js"></script>
+    <title>Cook now</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body class="cooking-page">
+    <div class="page-shell">
+      <header class="shell-header">
+        <div class="container wide-container app-shell-bar">
+          <a href="/" class="app-brand" aria-label="Buddy home">
+            <span class="brand-mark" aria-hidden="true">
+              <span class="brand-mark-card brand-mark-card-back"></span>
+              <span class="brand-mark-card brand-mark-card-front"></span>
+              <span class="brand-mark-accent"></span>
+            </span>
+            <span>Buddy</span>
+          </a>
+
+          <nav class="app-nav" aria-label="Primary navigation">
+            <a href="/" class="app-nav-link">Home</a>
+            <a href="/boardgames" class="app-nav-link">Board Games</a>
+            <a href="/cooking" class="app-nav-link" aria-current="page">Cooking</a>
+            <a href="/shopping" class="app-nav-link">Shopping</a>
+          </nav>
+
+          <div class="app-shell-actions">
+            <button type="button" class="theme-toggle-btn" data-theme-toggle aria-label="Switch to dark mode" aria-pressed="false">
+              <span class="theme-toggle-icon theme-toggle-icon-sun" aria-hidden="true">☀</span>
+              <span class="theme-toggle-icon theme-toggle-icon-moon" aria-hidden="true">☾</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container wide-container page-main">
+        <nav class="cooking-subnav" aria-label="Cooking sections">
+          <a href="/cooking">Overview</a>
+          <a href="/cooking/cook" aria-current="page">Cook now</a>
+          <a href="/cooking/recipes">Recipes</a>
+          <a href="/cooking/pantry">Pantry</a>
+        </nav>
+
+        {{if .Error}}<div class="cooking-feedback error" role="alert">{{.Error}}</div>{{end}}
+        {{if .Success}}<div class="cooking-feedback success" role="status">{{.Success}}</div>{{end}}
+
+        <section class="page-intro hero-card cooking-overview" aria-labelledby="cook-title">
+          <div class="section-heading cooking-overview-copy">
+            <span class="cooking-kicker">Pantry match</span>
+            <h1 id="cook-title">What can I cook?</h1>
+            <p>Every recipe is measured against the pantry, unit by unit. Recipes you can make right now come first, then the ones you are closest to completing.</p>
+            <div class="cluster">
+              <a href="/cooking/cook/pick" class="button-link">Surprise me</a>
+              <a href="/cooking/pantry" class="btn btn-tonal">Update pantry</a>
+            </div>
+          </div>
+          <div class="cooking-stat-grid" aria-label="Match totals">
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Ready to cook</span>
+              <strong>{{.CookableCount}}</strong>
+              <span class="cooking-stat-help">Fully covered by the pantry.</span>
+            </div>
+            <div class="cooking-stat-card">
+              <span class="cooking-stat-label">Recipes checked</span>
+              <strong>{{.TotalCount}}</strong>
+              <span class="cooking-stat-help">Everything in the library.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Filters</span>
+              <h2>Match settings</h2>
+              <p>Scale every recipe to the same serving count or tighten the list to what is ready right now.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <form class="cooking-toolbar" method="get" action="/cooking/cook">
+              <div class="form-field">
+                <label for="servings">Servings</label>
+                <input class="form-input" type="number" id="servings" name="servings" min="0" step="1" placeholder="Recipe default" {{if .Servings}}value="{{.Servings}}"{{end}}>
+              </div>
+              <label class="filter-checkbox">
+                <input type="checkbox" name="includeOptional" {{if .IncludeOptional}}checked{{end}}>
+                Require optional ingredients
+              </label>
+              <label class="filter-checkbox">
+                <input type="checkbox" name="onlyCookable" {{if .OnlyCookable}}checked{{end}}>
+                Only show what I can cook
+              </label>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-filled">Apply</button>
+                <a href="/cooking/cook" class="btn btn-text">Reset</a>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="card-shell">
+          <div class="card-header">
+            <div class="section-heading">
+              <span class="cooking-kicker">Results</span>
+              <h2>Recipe matches</h2>
+              <p>Missing amounts are already scaled to the servings above and converted into the unit each recipe uses.</p>
+            </div>
+            <span class="badge">{{len .Matches}} shown</span>
+          </div>
+          <div class="card-body">
+            {{if .Matches}}
+            <div class="cooking-match-grid">
+              {{range .Matches}}
+              <article class="cooking-match-card">
+                <div class="cooking-match-head">
+                  <h3><a href="/cooking/recipes/view?id={{.Recipe.Id}}&servings={{.Servings}}">{{.Recipe.Name}}</a></h3>
+                  <span class="status-pill {{.StatusClass}}">{{.StatusLabel}}</span>
+                </div>
+                <div class="cooking-coverage-bar" role="img" aria-label="{{.CoveragePercent}}% of the ingredients on hand">
+                  <div class="cooking-coverage-fill" style="width: {{.CoveragePercent}}%"></div>
+                </div>
+                <span class="cooking-coverage-label">{{.CoveragePercent}}% on hand &middot; {{.Servings}} serving(s){{if .Recipe.TotalDurationLabel}} &middot; {{.Recipe.TotalDurationLabel}}{{end}}</span>
+
+                {{if .Missing}}
+                <ul class="cooking-line-list">
+                  {{range .Missing}}
+                  <li class="cooking-line cooking-line-missing">
+                    <span>{{.Name}}{{if .Optional}} <span class="text-muted">(optional)</span>{{end}}</span>
+                    <span class="cooking-line-amount">{{if .NeedLabel}}{{.NeedLabel}} &middot; {{end}}{{.ReasonLabel}}</span>
+                  </li>
+                  {{end}}
+                </ul>
+                {{else}}
+                <p class="text-muted">Everything this recipe needs is in the pantry.</p>
+                {{end}}
+
+                <div class="cooking-inline-actions">
+                  {{if .Cookable}}
+                  <form method="post" action="/cooking/cook/complete">
+                    <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                    <input type="hidden" name="servings" value="{{.Servings}}">
+                    <button type="submit" class="btn btn-filled">Cooked it</button>
+                  </form>
+                  {{end}}
+                  {{if .Missing}}
+                  <form method="post" action="/cooking/shopping/push">
+                    <input type="hidden" name="id" value="{{.Recipe.Id}}">
+                    <input type="hidden" name="servings" value="{{.Servings}}">
+                    <button type="submit" class="btn btn-tonal">Add missing to shopping</button>
+                  </form>
+                  {{end}}
+                  <a href="/cooking/recipes/view?id={{.Recipe.Id}}&servings={{.Servings}}" class="btn btn-text">Open recipe</a>
+                </div>
+              </article>
+              {{end}}
+            </div>
+            {{else}}
+            <div class="cooking-empty">Nothing to show yet. Add recipes in the <a href="/cooking/recipes">library</a> and stock the <a href="/cooking/pantry">pantry</a>.</div>
+            {{end}}
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
